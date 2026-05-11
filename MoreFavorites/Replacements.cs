@@ -73,13 +73,13 @@ namespace Destrospean.MoreFavorites
                 }
                 EatingPosture postureParam = GetPostureParam();
                 SetParameter("eatPosture", postureParam);
-                bool paramValue = false;
+                bool isFavorite = false;
                 FavoritesUtils.FavoriteFood favoriteFood;
                 if (Actor.SimDescription.FavoriteFood != 0 && Target.Recipe != null && (Target.Recipe.Favorite == Actor.SimDescription.FavoriteFood || FavoritesUtils.FavoriteFoodDictionary.TryGetValue(Actor.SimDescription.FavoriteFood, out favoriteFood) && favoriteFood.Recipe.Key == Target.Recipe.Key))
                 {
-                    paramValue = true;
+                    isFavorite = true;
                 }
-                SetParameter("isFavorite", paramValue);
+                SetParameter("isFavorite", isFavorite);
                 SetParameter("isSloppy", Actor.HasTrait(TraitNames.Slob));
                 SetParameter("isSpoiled", Target.Spoiled);
                 SetParameter("isIceCream", Target is SnackIceCream);
@@ -180,8 +180,8 @@ namespace Destrospean.MoreFavorites
                     reactionBroadcaster.Dispose();
                     reactionBroadcaster = null;
                 }
-                bool paramValue2 = !Actor.HasExitReason(ExitReason.Finished);
-                SetParameter("wasInterrupted", paramValue2);
+                bool wasInterrupted = !Actor.HasExitReason(ExitReason.Finished);
+                SetParameter("wasInterrupted", wasInterrupted);
                 mCurrentStateMachine.RemoveEventHandler(StartSloppyVFX);
                 mCurrentStateMachine.RemoveEventHandler(StopSloppyVFX);
                 AnimateSim("Exit");
@@ -206,14 +206,14 @@ namespace Destrospean.MoreFavorites
                                 mTimeWaitForOtherStarted = Sims3.Gameplay.Utilities.SimClock.CurrentTime();
                                 Actor.RemoveExitReason(ExitReason.Finished);
                                 Actor.TryGroupTalk();
-                                DoLoop(ExitReason.Default, WaitForOthersLoopCallback, null, 5f);
+                                DoLoop(ExitReason.Default, WaitForOthersLoopCallback, null, 5);
                                 Actor.UnregisterGroupTalk();
                             }
                         }
                         if (Target.CanBeCleanedUp && !ShouldDestroyContainer)
                         {
                             float chance = Food.CleanupChance;
-                            if (Actor.HasTrait(TraitNames.Slob) || (Target.Recipe != null && Actor.SimDescription.IsGhost && Target.Recipe.Key == "Ambrosia") || (Actor.LotCurrent.IsCommunityLot && Target is IPaperContainer))
+                            if (Actor.HasTrait(TraitNames.Slob) || Target.Recipe != null && Actor.SimDescription.IsGhost && Target.Recipe.Key == "Ambrosia" || Actor.LotCurrent.IsCommunityLot && Target is IPaperContainer)
                             {
                                 chance = 0;
                             }
