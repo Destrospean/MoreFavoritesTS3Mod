@@ -41,7 +41,7 @@ namespace Destrospean.MoreFavorites
                 {
                     parentIsActor = false;
                 }
-                if (base.Autonomous)
+                if (Autonomous)
                 {
                     mPriority = new InteractionPriority(InteractionPriorityLevel.UserDirected);
                 }
