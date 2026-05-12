@@ -36,16 +36,16 @@ namespace Destrospean.MoreFavorites
                     }
                     return false;
                 }
-                bool parentIsActor = true;
+                bool addToUseList = true;
                 if (Target.Parent == Actor)
                 {
-                    parentIsActor = false;
+                    addToUseList = false;
                 }
                 if (Autonomous)
                 {
                     mPriority = new InteractionPriority(InteractionPriorityLevel.UserDirected);
                 }
-                StandardEntry(parentIsActor);
+                StandardEntry(addToUseList);
                 ChairDining chairDining = Actor.Posture.Container as ChairDining;
                 if (chairDining != null && chairDining.Parent != null && chairDining.ChairState == ChairDining.State.Angled && Target.Parent != Actor)
                 {
@@ -283,7 +283,7 @@ namespace Destrospean.MoreFavorites
                 if (!Target.CanBeCleanedUp)
                 {
                     CarrySystem.ExitCarry(Actor);
-                    parentIsActor = false;
+                    addToUseList = false;
                     DestroyObject(Target);
                 }
                 if (glassIsSpoiled && Sims3.Gameplay.Core.RandomUtil.RandomChance(kChanceToThrowUpFromBarGlass))
@@ -295,7 +295,7 @@ namespace Destrospean.MoreFavorites
                     Actor.InteractionQueue.PushAsContinuation(FinishEatingOutside.Singleton, Target, true);
                 }
                 Actor.BuffManager.RemoveElement(BuffNames.MintyBreath);
-                StandardExit(parentIsActor, parentIsActor);
+                StandardExit(addToUseList, addToUseList);
                 return loopDone;
             }
         }
