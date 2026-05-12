@@ -292,7 +292,7 @@ namespace Destrospean.MoreFavorites
 
         public static string GetFavoriteFood(FavoriteFoodType foodType)
         {
-            return foodType == FavoriteFoodType.None ? Responder.Instance.LocalizationModel.LocalizeString("Ui/Caption/CAS/Favorites:None") : Responder.Instance.LocalizationModel.LocalizeString(foodType < FavoriteFoodType.Count ? "Gameplay/Excel/RecipeMasterList/Data:" + foodType : FavoritesUtils.FavoriteFoodDictionary[foodType].Recipe.mGenericName);
+            return foodType == FavoriteFoodType.None ? Responder.Instance.LocalizationModel.LocalizeString("Ui/Caption/CAS/Favorites:None") : Responder.Instance.LocalizationModel.LocalizeString(foodType > FavoriteFoodType.Count ? FavoritesUtils.FavoriteFoodDictionary[foodType].Recipe.mGenericName : "Gameplay/Excel/RecipeMasterList/Data:" + foodType);
         }
 
         public static UIImage GetFavoriteFoodIcon(FavoriteFoodType foodType)
@@ -306,17 +306,17 @@ namespace Destrospean.MoreFavorites
             {
                 foodType = FavoriteFoodType.Hamburger;
             }
-            return foodType < FavoriteFoodType.Count ? "cas_favorites_food_i_" + foodType + "_r2" : FavoritesUtils.FavoriteFoodDictionary[foodType].IconKey ?? "cas_favorites_food_i_hamburger_r2";
+            return foodType > FavoriteFoodType.Count ? FavoritesUtils.FavoriteFoodDictionary[foodType].IconKey ?? "cas_favorites_food_i_hamburger_r2" : "cas_favorites_food_i_" + foodType + "_r2";
         }
 
         public static UIImage GetFavoriteFoodSmallIcon(FavoriteFoodType foodType)
         {
-            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(foodType < FavoriteFoodType.Count ? "cas_favorites_food_i_" + foodType + "_s_r2" : FavoritesUtils.FavoriteFoodDictionary[foodType].SmallIconKey ?? "cas_favorites_food_i_hamburger_s_r2", 0));
+            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(foodType > FavoriteFoodType.Count ? FavoritesUtils.FavoriteFoodDictionary[foodType].SmallIconKey ?? "cas_favorites_food_i_hamburger_s_r2" : "cas_favorites_food_i_" + foodType + "_s_r2", 0));
         }
 
         public static string GetFavoriteMusic(FavoriteMusicType musicType)
         {
-            return musicType == FavoriteMusicType.None ? Responder.Instance.LocalizationModel.LocalizeString("Ui/Caption/CAS/Favorites:None") : Responder.Instance.LocalizationModel.LocalizeString(musicType < FavoriteMusicType.Count ? "Gameplay/Excel/Stereo/Stations:" + musicType : FavoritesUtils.FavoriteMusicDictionary[musicType].StereoStationData.mStationName);
+            return musicType == FavoriteMusicType.None ? Responder.Instance.LocalizationModel.LocalizeString("Ui/Caption/CAS/Favorites:None") : Responder.Instance.LocalizationModel.LocalizeString(musicType > FavoriteMusicType.Count ? FavoritesUtils.FavoriteMusicDictionary[musicType].StereoStationData.mStationName : "Gameplay/Excel/Stereo/Stations:" + musicType);
         }
 
         public static string GetFavoriteMusicPngName(FavoriteMusicType musicType)
@@ -342,7 +342,7 @@ namespace Destrospean.MoreFavorites
                 case FavoriteMusicType.Custom:
                     return "cas_favorites_music_i_" + musicType + "_r2";
                 default:
-                    return musicType < FavoriteMusicType.Count ? "cas_favs_music_i_" + musicType + "_r2" : FavoritesUtils.FavoriteMusicDictionary[musicType].IconKey ?? "cas_favorites_music_i_electronica_r2";
+                    return musicType > FavoriteMusicType.Count ? FavoritesUtils.FavoriteMusicDictionary[musicType].IconKey ?? "cas_favorites_music_i_electronica_r2" : "cas_favs_music_i_" + musicType + "_r2";
             }
         }
 
@@ -367,7 +367,7 @@ namespace Destrospean.MoreFavorites
                     imageFileName = "cas_favorites_music_i_" + musicType + "_s_r2";
                     break;
                 default:
-                    imageFileName = musicType < FavoriteMusicType.Count ? "cas_favs_music_i_" + musicType + "_s" : FavoritesUtils.FavoriteMusicDictionary[musicType].SmallIconKey ?? "cas_favorites_music_i_electronica_s_r2";
+                    imageFileName = musicType > FavoriteMusicType.Count ? FavoritesUtils.FavoriteMusicDictionary[musicType].SmallIconKey ?? "cas_favorites_music_i_electronica_s_r2" : "cas_favs_music_i_" + musicType + "_s";
                     break;
             }
             return GetMusicIcon(imageFileName, musicType);
@@ -403,14 +403,14 @@ namespace Destrospean.MoreFavorites
 
         public static UIImage GetMusicIcon(string imageFileName, FavoriteMusicType musicType)
         {
-            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(imageFileName, musicType < FavoriteMusicType.Count ? ResourceUtils.ProductVersionToGroupId(Responder.Instance.GetProductVersionForStereoStation(musicType)) : 0));
+            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(imageFileName, musicType > FavoriteMusicType.Count ? 0 : ResourceUtils.ProductVersionToGroupId(Responder.Instance.GetProductVersionForStereoStation(musicType))));
         }
 
         public static Sims3.UI.CAS.IRecipe GetRecipe(FavoriteFoodType foodType)
         {
             Sims3.Gameplay.Objects.FoodObjects.Recipe recipe;
             FavoritesUtils.FavoriteFood favoriteFood;
-            return foodType < FavoriteFoodType.Count && Sims3.Gameplay.Objects.FoodObjects.Recipe.NameToRecipeHash.TryGetValue(foodType.ToString(), out recipe) ? recipe : FavoritesUtils.FavoriteFoodDictionary.TryGetValue(foodType, out favoriteFood) ? favoriteFood.Recipe : null;
+            return foodType > FavoriteFoodType.Count && FavoritesUtils.FavoriteFoodDictionary.TryGetValue(foodType, out favoriteFood) ? favoriteFood.Recipe : Sims3.Gameplay.Objects.FoodObjects.Recipe.NameToRecipeHash.TryGetValue(foodType.ToString(), out recipe) ? recipe: null;
         }
 
         public static string GetStationName(FavoriteMusicType musicType)

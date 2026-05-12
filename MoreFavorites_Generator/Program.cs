@@ -68,23 +68,33 @@ namespace Destrospean.MoreFavorites_Generator
             }
 
             // Copy the elements from the XML to put into the new package
-            System.Xml.XmlNode rootNode = xmlDocument.SelectSingleNode("Favorites");
-            List<System.Xml.XmlElement> favoriteFoodElements = new List<System.Xml.XmlElement>(),
+            System.Xml.XmlNode rootNode = xmlDocument.SelectSingleNode("Favorites") ?? xmlDocument.SelectSingleNode("Favourites");
+            List<System.Xml.XmlElement> favoriteColorElements = new List<System.Xml.XmlElement>(),
+            favoriteFoodElements = new List<System.Xml.XmlElement>(),
             favoriteMusicElements = new List<System.Xml.XmlElement>();
             foreach (System.Xml.XmlNode node in rootNode.ChildNodes)
             {
-                if (node.Name == "FavoriteFood" && !favoriteFoodElements.Exists(x => node.Attributes["Recipe_Key"].Value == x.GetAttribute("Recipe_Key")))
+                if ((node.Name == "FavoriteColor" || node.Name == "FavouriteColour") && !favoriteColorElements.Exists(x => node.Attributes["Name"].Value == x.GetAttribute("Name")))
+                {
+                    favoriteColorElements.Add((System.Xml.XmlElement)node);
+                }
+                if ((node.Name == "FavoriteFood" || node.Name == "FavouriteFood") && !favoriteFoodElements.Exists(x => node.Attributes["Recipe_Key"].Value == x.GetAttribute("Recipe_Key")))
                 {
                     favoriteFoodElements.Add((System.Xml.XmlElement)node);
                 }
-                if (node.Name == "FavoriteMusic" && !favoriteMusicElements.Exists(x => node.Attributes["Station_Name"].Value == x.GetAttribute("Station_Name")))
+                if ((node.Name == "FavoriteMusic" || node.Name == "FavouriteMusic") && !favoriteMusicElements.Exists(x => node.Attributes["Station_Name"].Value == x.GetAttribute("Station_Name")))
                 {
                     favoriteMusicElements.Add((System.Xml.XmlElement)node);
                 }
             }
+            favoriteColorElements.RemoveAt(0);
             favoriteFoodElements.RemoveAt(0);
             favoriteMusicElements.RemoveAt(0);
             rootNode.RemoveAll();
+            foreach (var favoriteColorElement in favoriteColorElements)
+            {
+                rootNode.AppendChild(favoriteColorElement);
+            }
             foreach (var favoriteFoodElement in favoriteFoodElements)
             {
                 rootNode.AppendChild(favoriteFoodElement);
