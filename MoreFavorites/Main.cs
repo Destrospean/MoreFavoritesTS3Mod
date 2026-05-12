@@ -26,6 +26,7 @@ namespace Destrospean.MoreFavorites
             ReplaceMethod(typeof(Sims3.Gameplay.CAS.CASLogic).GetMethod("GetRecipe"), typeof(Replacements).GetMethod("GetRecipe"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.CookingObjects.EatHeldFood).GetMethod("Run", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Replacements.EatHeldFood).GetMethod("Run"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.Electronics.StereoStationData).GetMethod("GetStationName"), typeof(Replacements).GetMethod("GetStationName"));
+            Sims3.SimIFace.World.sOnWorldLoadFinishedEventHandler += (sender, e) => FavoritesUtils.InitFavorites();
         }
 
         /// <summary>This method was borrowed from Lazy Duchess' Mono Patcher</summary>

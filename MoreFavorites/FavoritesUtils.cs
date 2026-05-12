@@ -94,7 +94,7 @@ namespace Destrospean.MoreFavorites
                             name = reader.GetAttribute("Name");
                             uint argb;
                             int startIndex;
-                            if (hex != null && name != null && uint.TryParse(hex.Substring(startIndex = hex.StartsWith("#") ? 1 : hex.StartsWith("0x") ? 2 : 0) + ("FFFFFFFF".Remove(0, hex.Length - startIndex)), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out argb))
+                            if (hex != null && name != null && uint.TryParse(("FFFFFFFF".Remove(0, hex.Length - (startIndex = hex.StartsWith("#") ? 1 : hex.StartsWith("0x") ? 2 : 0))) + hex.Substring(startIndex), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out argb))
                             {
                                 favoriteColorList.Add(new CASCharacter.NameColorPair(name, new Color(argb)));
                             }
