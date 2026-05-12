@@ -342,7 +342,7 @@ namespace Destrospean.MoreFavorites
                 case FavoriteMusicType.Custom:
                     return "cas_favorites_music_i_" + musicType + "_r2";
                 default:
-                    return musicType > FavoriteMusicType.Count ? FavoritesUtils.FavoriteMusicDictionary[musicType].IconKey ?? "cas_favorites_music_i_electronica_r2" : "cas_favs_music_i_" + musicType + "_r2";
+                    return musicType > FavoriteMusicType.Count ? FavoritesUtils.FavoriteMusicDictionary[musicType].IconKey ?? "cas_favorites_music_i_electronica_r2" : "cas_favs_music_i_" + musicType;
             }
         }
 
