@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Sims3.Gameplay.Abstracts;
 using Sims3.Gameplay.Actors;
 using Sims3.Gameplay.ActorSystems;
 using Sims3.Gameplay.Autonomy;
@@ -52,7 +51,7 @@ namespace Destrospean.MoreFavorites
                     InteractionInstance interactionInstance = SitTransitionAngledToStraight.Singleton.CreateInstance(Actor.Posture.Container, Actor, GetPriority(), false, false);
                     interactionInstance.RunInteraction();
                 }
-                Food.PreEat(Actor, Target as GameObject, ref mIsSufficientlyFullForStuffed, ref mHasFatDelta);
+                Food.PreEat(Actor, Target as Sims3.Gameplay.Abstracts.GameObject, ref mIsSufficientlyFullForStuffed, ref mHasFatDelta);
                 mCurrentStateMachine = StateMachineClient.Acquire(Actor, "eat", AnimationPriority.kAPCarryRightPlus);
                 SetActor("x", Actor);
                 SetParameter("isWerewolf", chairDining != null && Actor.BuffManager.HasElement(BuffNames.Werewolf));
@@ -71,15 +70,10 @@ namespace Destrospean.MoreFavorites
                     SittingPosture sittingPosture = Actor.Posture as SittingPosture;
                     SetParameter("sitTemplateSuffix", sittingPosture.Part.Target.IKSuffix);
                 }
-                EatingPosture postureParam = GetPostureParam();
-                SetParameter("eatPosture", postureParam);
-                bool isFavorite = false;
+                EatingPosture eatingPosture = GetPostureParam();
+                SetParameter("eatPosture", eatingPosture);
                 FavoritesUtils.FavoriteFood favoriteFood;
-                if (Actor.SimDescription.FavoriteFood != 0 && Target.Recipe != null && (Target.Recipe.Favorite == Actor.SimDescription.FavoriteFood || FavoritesUtils.FavoriteFoodDictionary.TryGetValue(Actor.SimDescription.FavoriteFood, out favoriteFood) && favoriteFood.Recipe.Key == Target.Recipe.Key))
-                {
-                    isFavorite = true;
-                }
-                SetParameter("isFavorite", isFavorite);
+                SetParameter("isFavorite", Actor.SimDescription.FavoriteFood != 0 && Target.Recipe != null && (Target.Recipe.Favorite == Actor.SimDescription.FavoriteFood || FavoritesUtils.FavoriteFoodDictionary.TryGetValue(Actor.SimDescription.FavoriteFood, out favoriteFood) && favoriteFood.Recipe.Key == Target.Recipe.Key));
                 SetParameter("isSloppy", Actor.HasTrait(TraitNames.Slob));
                 SetParameter("isSpoiled", Target.Spoiled);
                 SetParameter("isIceCream", Target is SnackIceCream);
@@ -100,7 +94,7 @@ namespace Destrospean.MoreFavorites
                 SetParameter("UtensilType", utensilType);
                 if (Target.CountsAsFood && !Target.IsDrinkable)
                 {
-                    switch (postureParam)
+                    switch (eatingPosture)
                     {
                         case EatingPosture.diningIn:
                             if (utensilType == UtensilType.fork || utensilType == UtensilType.hand)
@@ -139,7 +133,7 @@ namespace Destrospean.MoreFavorites
                 mCurrentStateMachine.AddOneShotScriptEventHandler(105, ParentFoodToContainer);
                 mCurrentStateMachine.AddPersistentScriptEventHandler(501, StartSloppyVFX);
                 mCurrentStateMachine.AddPersistentScriptEventHandler(502, StopSloppyVFX);
-                if (postureParam == EatingPosture.living)
+                if (eatingPosture == EatingPosture.living)
                 {
                     Seat.EnsureLivingChairPosture(Actor);
                 }
@@ -199,7 +193,7 @@ namespace Destrospean.MoreFavorites
                         if (Autonomous && Actor.Posture.Container != null && Actor.Posture.Container.Parent != null)
                         {
                             IEatingSurface eatingSurface = Actor.Posture.Container.Parent as IEatingSurface;
-                            if (eatingSurface != null && eatingSurface.AllowWaitForOthers && (eatingSurface.NumOtherSimsAtSurface(Actor) > 0 || ((GameObject)eatingSurface).ReferenceList.Count > 0))
+                            if (eatingSurface != null && eatingSurface.AllowWaitForOthers && (eatingSurface.NumOtherSimsAtSurface(Actor) > 0 || ((Sims3.Gameplay.Abstracts.GameObject)eatingSurface).ReferenceList.Count > 0))
                             {
                                 Actor.LoopIdle();
                                 Actor.RegisterGroupTalk();
@@ -249,7 +243,7 @@ namespace Destrospean.MoreFavorites
                         }
                     }
                 }
-                Food.PostEat(Actor, Target as GameObject, mIsSufficientlyFullForStuffed, HungerGiven > 0, mHasFatDelta);
+                Food.PostEat(Actor, Target as Sims3.Gameplay.Abstracts.GameObject, mIsSufficientlyFullForStuffed, HungerGiven > 0, mHasFatDelta);
                 if (Target.Recipe != null && !Target.Recipe.IsSnack)
                 {
                     Target.Recipe.LearnFromEating(Actor);
