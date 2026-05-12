@@ -13,7 +13,6 @@ namespace Destrospean.MoreFavorites
         {
             BindingFlags nonPublicStatic = BindingFlags.NonPublic | BindingFlags.Static;
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFood"), typeof(Replacements).GetMethod("GetFavoriteFood"));
-            ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodIcon"), typeof(Replacements).GetMethod("GetFavoriteFoodIcon"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodName", nonPublicStatic), typeof(Replacements).GetMethod("GetFavoriteFood"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodPngName"), typeof(Replacements).GetMethod("GetFavoriteFoodPngName"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodSmallIcon"), typeof(Replacements).GetMethod("GetFavoriteFoodSmallIcon"));
@@ -24,7 +23,7 @@ namespace Destrospean.MoreFavorites
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetInstalledFavoriteFoodList"), typeof(Replacements).GetMethod("GetInstalledFavoriteFoodList"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetInstalledFavoriteMusicList"), typeof(Replacements).GetMethod("GetInstalledFavoriteMusicList"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetMusicIcon", nonPublicStatic), typeof(Replacements).GetMethod("GetMusicIcon"));
-            ReplaceMethod(typeof(Sims3.Gameplay.CAS.CASLogic).GetMethod("GetRecipe", BindingFlags.Public | BindingFlags.Instance), typeof(Replacements).GetMethod("GetRecipe"));
+            ReplaceMethod(typeof(Sims3.Gameplay.CAS.CASLogic).GetMethod("GetRecipe"), typeof(Replacements).GetMethod("GetRecipe"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.CookingObjects.EatHeldFood).GetMethod("Run", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Replacements.EatHeldFood).GetMethod("Run"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.Electronics.StereoStationData).GetMethod("GetStationName"), typeof(Replacements).GetMethod("GetStationName"));
         }

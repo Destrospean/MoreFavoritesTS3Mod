@@ -295,11 +295,6 @@ namespace Destrospean.MoreFavorites
             return foodType == FavoriteFoodType.None ? Responder.Instance.LocalizationModel.LocalizeString("Ui/Caption/CAS/Favorites:None") : Responder.Instance.LocalizationModel.LocalizeString(foodType > FavoriteFoodType.Count ? FavoritesUtils.FavoriteFoodDictionary[foodType].Recipe.mGenericName : "Gameplay/Excel/RecipeMasterList/Data:" + foodType);
         }
 
-        public static UIImage GetFavoriteFoodIcon(FavoriteFoodType foodType)
-        {
-            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(GetFavoriteFoodPngName(foodType), 0));
-        }
-
         public static string GetFavoriteFoodPngName(FavoriteFoodType foodType)
         {
             if (foodType == FavoriteFoodType.None)

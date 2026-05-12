@@ -52,7 +52,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Main.cs" />
-    <Compile Include="Tuning.cs" />
     <Compile Include="FavoritesUtils.cs" />
     <Compile Include="Replacements.cs" />
   </ItemGroup>
