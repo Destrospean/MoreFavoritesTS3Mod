@@ -48,8 +48,7 @@ namespace Destrospean.MoreFavorites
                 ChairDining chairDining = Actor.Posture.Container as ChairDining;
                 if (chairDining != null && chairDining.Parent != null && chairDining.ChairState == ChairDining.State.Angled && Target.Parent != Actor)
                 {
-                    InteractionInstance interactionInstance = SitTransitionAngledToStraight.Singleton.CreateInstance(Actor.Posture.Container, Actor, GetPriority(), false, false);
-                    interactionInstance.RunInteraction();
+                    SitTransitionAngledToStraight.Singleton.CreateInstance(Actor.Posture.Container, Actor, GetPriority(), false, false).RunInteraction();
                 }
                 Food.PreEat(Actor, Target as Sims3.Gameplay.Abstracts.GameObject, ref mIsSufficientlyFullForStuffed, ref mHasFatDelta);
                 mCurrentStateMachine = StateMachineClient.Acquire(Actor, "eat", AnimationPriority.kAPCarryRightPlus);
@@ -67,8 +66,7 @@ namespace Destrospean.MoreFavorites
                 if (Actor.Posture != null && Actor.Posture.Satisfies(CommodityKind.Sitting, Target))
                 {
                     SetActor("sitTemplate", Actor.Posture.Container);
-                    SittingPosture sittingPosture = Actor.Posture as SittingPosture;
-                    SetParameter("sitTemplateSuffix", sittingPosture.Part.Target.IKSuffix);
+                    SetParameter("sitTemplateSuffix", ((SittingPosture)Actor.Posture).Part.Target.IKSuffix);
                 }
                 EatingPosture eatingPosture = GetPostureParam();
                 SetParameter("eatPosture", eatingPosture);
@@ -128,8 +126,7 @@ namespace Destrospean.MoreFavorites
                         mCurrentStateMachine.SetPropActor("utensil", mPropHandle);
                     }
                 }
-                ObjectHideHelper objectHideHelper = new ObjectHideHelper(Target);
-                mCurrentStateMachine.AddOneShotScriptEventHandler(101, objectHideHelper.Callback);
+                mCurrentStateMachine.AddOneShotScriptEventHandler(101, new ObjectHideHelper(Target).Callback);
                 mCurrentStateMachine.AddOneShotScriptEventHandler(105, ParentFoodToContainer);
                 mCurrentStateMachine.AddPersistentScriptEventHandler(501, StartSloppyVFX);
                 mCurrentStateMachine.AddPersistentScriptEventHandler(502, StopSloppyVFX);
@@ -174,8 +171,7 @@ namespace Destrospean.MoreFavorites
                     reactionBroadcaster.Dispose();
                     reactionBroadcaster = null;
                 }
-                bool wasInterrupted = !Actor.HasExitReason(ExitReason.Finished);
-                SetParameter("wasInterrupted", wasInterrupted);
+                SetParameter("wasInterrupted", !Actor.HasExitReason(ExitReason.Finished));
                 mCurrentStateMachine.RemoveEventHandler(StartSloppyVFX);
                 mCurrentStateMachine.RemoveEventHandler(StopSloppyVFX);
                 AnimateSim("Exit");
@@ -248,11 +244,11 @@ namespace Destrospean.MoreFavorites
                 {
                     Target.Recipe.LearnFromEating(Actor);
                 }
-                bool glassIsSpoiled = false;
+                bool isSpoiledGlass = false;
                 Bar.Glass glass = Target as Bar.Glass;
                 if (glass != null)
                 {
-                    glassIsSpoiled = glass.Spoiled;
+                    isSpoiledGlass = glass.Spoiled;
                 }
                 if (Actor.SimDescription.IsBonehilda && Target is Sims3.Gameplay.Interfaces.IGlass)
                 {
@@ -262,11 +258,11 @@ namespace Destrospean.MoreFavorites
                 {
                     nectarGlass.DoPostDrink(Actor, GetPriority().Level == InteractionPriorityLevel.Autonomous);
                 }
-                else if (Target is Bar.Glass && !glassIsSpoiled)
+                else if (glass != null && !isSpoiledGlass)
                 {
                     Actor.BuffManager.AddElement(BuffNames.SugarRush, Origin.FromJuice);
                 }
-                if (Target is Bar.Glass)
+                if (glass != null)
                 {
                     Actor.BuffManager.RemoveElement(BuffNames.TooSpicy);
                     if (Actor.BuffManager.HasElement(BuffNames.Spicy) && Actor.Motives.GetValue(CommodityKind.Hunger) == Actor.Motives.GetMax(CommodityKind.Hunger))
@@ -280,7 +276,7 @@ namespace Destrospean.MoreFavorites
                     addToUseList = false;
                     DestroyObject(Target);
                 }
-                if (glassIsSpoiled && Sims3.Gameplay.Core.RandomUtil.RandomChance(kChanceToThrowUpFromBarGlass))
+                if (isSpoiledGlass && Sims3.Gameplay.Core.RandomUtil.RandomChance(kChanceToThrowUpFromBarGlass))
                 {
                     Actor.PlayReaction(ReactionTypes.ThrowUp, new InteractionPriority(InteractionPriorityLevel.High), null, ReactionSpeed.AfterInteraction);
                 }
