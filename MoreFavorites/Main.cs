@@ -11,20 +11,20 @@ namespace Destrospean.MoreFavorites
 
         static Main()
         {
-            BindingFlags nonPublicStatic = BindingFlags.NonPublic | BindingFlags.Static;
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFood"), typeof(Replacements).GetMethod("GetFavoriteFood"));
-            ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodName", nonPublicStatic), typeof(Replacements).GetMethod("GetFavoriteFood"));
+            ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodName", BindingFlags.NonPublic | BindingFlags.Static), typeof(Replacements).GetMethod("GetFavoriteFood"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodPngName"), typeof(Replacements).GetMethod("GetFavoriteFoodPngName"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodSmallIcon"), typeof(Replacements).GetMethod("GetFavoriteFoodSmallIcon"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteMusic"), typeof(Replacements).GetMethod("GetFavoriteMusic"));
-            ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteMusicName", nonPublicStatic), typeof(Replacements).GetMethod("GetFavoriteMusic"));
+            ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteMusicName", BindingFlags.NonPublic | BindingFlags.Static), typeof(Replacements).GetMethod("GetFavoriteMusic"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteMusicPngName"), typeof(Replacements).GetMethod("GetFavoriteMusicPngName"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteMusicSmallIcon"), typeof(Replacements).GetMethod("GetFavoriteMusicSmallIcon"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetInstalledFavoriteFoodList"), typeof(Replacements).GetMethod("GetInstalledFavoriteFoodList"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetInstalledFavoriteMusicList"), typeof(Replacements).GetMethod("GetInstalledFavoriteMusicList"));
-            ReplaceMethod(typeof(CASCharacter).GetMethod("GetMusicIcon", nonPublicStatic), typeof(Replacements).GetMethod("GetMusicIcon"));
+            ReplaceMethod(typeof(CASCharacter).GetMethod("GetMusicIcon", BindingFlags.NonPublic | BindingFlags.Static), typeof(Replacements).GetMethod("GetMusicIcon"));
             ReplaceMethod(typeof(Sims3.Gameplay.CAS.CASLogic).GetMethod("GetRecipe"), typeof(Replacements).GetMethod("GetRecipe"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.CookingObjects.EatHeldFood).GetMethod("Run", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Replacements.EatHeldFood).GetMethod("Run"));
+            ReplaceMethod(typeof(Sims3.Gameplay.Objects.Appliances.FutureBar.OrderDrinks).GetMethod("Run", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Replacements.OrderDrinks).GetMethod("Run"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.Electronics.StereoStationData).GetMethod("GetStationName"), typeof(Replacements).GetMethod("GetStationName"));
             Sims3.SimIFace.World.sOnWorldLoadFinishedEventHandler += (sender, e) => FavoritesUtils.InitFavorites();
         }

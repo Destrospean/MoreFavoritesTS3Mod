@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sims3.Gameplay;
+using Sims3.Gameplay.Abstracts;
 using Sims3.Gameplay.Actors;
 using Sims3.Gameplay.ActorSystems;
 using Sims3.Gameplay.Autonomy;
+using Sims3.Gameplay.EventSystem;
 using Sims3.Gameplay.Interactions;
+using Sims3.Gameplay.Objects.Appliances;
 using Sims3.Gameplay.Objects.CookingObjects;
 using Sims3.Gameplay.Objects.Counters;
 using Sims3.Gameplay.Objects.FoodObjects;
@@ -50,7 +54,7 @@ namespace Destrospean.MoreFavorites
                 {
                     SitTransitionAngledToStraight.Singleton.CreateInstance(Actor.Posture.Container, Actor, GetPriority(), false, false).RunInteraction();
                 }
-                Food.PreEat(Actor, Target as Sims3.Gameplay.Abstracts.GameObject, ref mIsSufficientlyFullForStuffed, ref mHasFatDelta);
+                Food.PreEat(Actor, Target as GameObject, ref mIsSufficientlyFullForStuffed, ref mHasFatDelta);
                 mCurrentStateMachine = StateMachineClient.Acquire(Actor, "eat", AnimationPriority.kAPCarryRightPlus);
                 SetActor("x", Actor);
                 SetParameter("isWerewolf", chairDining != null && Actor.BuffManager.HasElement(BuffNames.Werewolf));
@@ -80,7 +84,7 @@ namespace Destrospean.MoreFavorites
                 {
                     nectarGlass.SetParameters(Actor, this);
                 }
-                if (Target is Sims3.Gameplay.Objects.Appliances.FutureBar.FutureBarGlass && Target.Spoiled)
+                if (Target is FutureBar.FutureBarGlass && Target.Spoiled)
                 {
                     SetParameter("isServoJuice", true);
                 }
@@ -115,11 +119,11 @@ namespace Destrospean.MoreFavorites
                 {
                     if (utensilType == UtensilType.chopsticks)
                     {
-                        mPropHandle = Sims3.Gameplay.GlobalFunctions.CreateProp("UtensilChopsticks", Vector3.OutOfWorld, 0, Vector3.UnitZ);
+                        mPropHandle = GlobalFunctions.CreateProp("UtensilChopsticks", Vector3.OutOfWorld, 0, Vector3.UnitZ);
                     }
                     else
                     {
-                        mPropHandle = Sims3.Gameplay.GlobalFunctions.CreateProp(GetUtensilMedatorName(Target.UtensilName), Vector3.OutOfWorld, 0, Vector3.UnitZ);
+                        mPropHandle = GlobalFunctions.CreateProp(GetUtensilMedatorName(Target.UtensilName), Vector3.OutOfWorld, 0, Vector3.UnitZ);
                     }
                     if (mPropHandle != ObjectGuid.InvalidObjectGuid)
                     {
@@ -151,7 +155,7 @@ namespace Destrospean.MoreFavorites
                 Actor.RegisterGroupTalk();
                 OccultImaginaryFriend.GrantMilestoneBuff(Actor, BuffNames.ImaginaryFriendAteFood, Origin.FromImaginaryFriendFirstTime, false, true, false);
                 bool loopDone = DoLoop(ExitReason.Default, LoopCallback, mCurrentStateMachine);
-                Sims3.Gameplay.Objects.Appliances.HotBeverageMachine.Cup cup = Target.ThingToEat as Sims3.Gameplay.Objects.Appliances.HotBeverageMachine.Cup;
+                HotBeverageMachine.Cup cup = Target.ThingToEat as HotBeverageMachine.Cup;
                 if (loopDone && GameUtils.IsInstalled(ProductVersion.EP9) && cup != null && cup.IsEnergyDrink)
                 {
                     Actor.BuffManager.AddElement(BuffNames.LiquidEnergy, Origin.FromEnergyDrink);
@@ -189,7 +193,7 @@ namespace Destrospean.MoreFavorites
                         if (Autonomous && Actor.Posture.Container != null && Actor.Posture.Container.Parent != null)
                         {
                             IEatingSurface eatingSurface = Actor.Posture.Container.Parent as IEatingSurface;
-                            if (eatingSurface != null && eatingSurface.AllowWaitForOthers && (eatingSurface.NumOtherSimsAtSurface(Actor) > 0 || ((Sims3.Gameplay.Abstracts.GameObject)eatingSurface).ReferenceList.Count > 0))
+                            if (eatingSurface != null && eatingSurface.AllowWaitForOthers && (eatingSurface.NumOtherSimsAtSurface(Actor) > 0 || ((GameObject)eatingSurface).ReferenceList.Count > 0))
                             {
                                 Actor.LoopIdle();
                                 Actor.RegisterGroupTalk();
@@ -239,7 +243,7 @@ namespace Destrospean.MoreFavorites
                         }
                     }
                 }
-                Food.PostEat(Actor, Target as Sims3.Gameplay.Abstracts.GameObject, mIsSufficientlyFullForStuffed, HungerGiven > 0, mHasFatDelta);
+                Food.PostEat(Actor, Target as GameObject, mIsSufficientlyFullForStuffed, HungerGiven > 0, mHasFatDelta);
                 if (Target.Recipe != null && !Target.Recipe.IsSnack)
                 {
                     Target.Recipe.LearnFromEating(Actor);
@@ -287,6 +291,128 @@ namespace Destrospean.MoreFavorites
                 Actor.BuffManager.RemoveElement(BuffNames.MintyBreath);
                 StandardExit(addToUseList, addToUseList);
                 return loopDone;
+            }
+        }
+
+        public class OrderDrinks : FutureBar.OrderDrinks
+        {
+            public override bool Run()
+            {
+                Definition definition = InteractionDefinition as Definition;
+                if (definition.IsPushedRound)
+                {
+                    FutureBar.FutureBarGlass futureBarGlass = definition.GlassObjectId.ObjectFromId<FutureBar.FutureBarGlass>();
+                    if (futureBarGlass != null)
+                    {
+                        futureBarGlass.SetPosition(futureBarGlass.GetSlotPosition(Slot.ContainmentSlot_0));
+                        futureBarGlass.SetOpacity(0, 0);
+                        futureBarGlass.AddToWorld();
+                        futureBarGlass.FadeIn();
+                        VisualEffect.FireOneShotEffect("ep11BarDrinkPoof_main", Target, Slot.FXJoint_0, VisualEffect.TransitionType.SoftTransition);
+                        futureBarGlass.ParentToSlot(Target, Slot.ContainmentSlot_0);
+                    }
+                    return true;
+                }
+                if (!Target.RouteAndCheckInUse(Actor))
+                {
+                    return false;
+                }
+                bool isSitting = Actor.Posture is SittingPosture;
+                StandardEntry();
+                BeginCommodityUpdates();
+                GameObject gameObject = GameObject.GetObject(FutureBar.ContainmentSlotInUse(Target));
+                if (gameObject != null)
+                {
+                    gameObject.FadeOut();
+                    gameObject.Destroy();
+                }
+                string materialStateName = "drink" + definition.DrinkName;
+                if (FavoritesUtils.FavoriteColorList.Contains(definition.DrinkColor.ARGB))
+                {
+                    materialStateName = "MoreFavs_" + FavoritesUtils.FindClosestColor(Array.ConvertAll(FavoritesUtils.FutureBarGlassRGBValues, x => new Color(x | 0xFF000000)), definition.DrinkColor).ARGB.ToString("X8").Substring(2);
+                }
+                FutureBar.FutureBarGlass futureBarGlass1 = GlobalFunctions.CreateObjectOutOfWorld("accessoryGlassEP11", ProductVersion.EP11) as FutureBar.FutureBarGlass;
+                futureBarGlass1.SetOpacity(0, 0);
+                if (definition.DrinkName == "ServoJuice")
+                {
+                    futureBarGlass1.SetGeometryState("servojuice");
+                    futureBarGlass1.mCurrentGeoState = "servojuice";
+                    futureBarGlass1.mCurrentMatState = "drinkAqua";
+                }
+                else
+                {
+                    futureBarGlass1.SetGeometryState("full");
+                    futureBarGlass1.SetMaterial(materialStateName);
+                    futureBarGlass1.mCurrentGeoState = "full";
+                    futureBarGlass1.mCurrentMatState = materialStateName;
+                }
+                futureBarGlass1.AddToWorld();
+                futureBarGlass1.Contents.mDrinkName = definition.DrinkName;
+                futureBarGlass1.Contents.mObjectCreatorId = Target.ObjectId;
+                EnterStateMachine("FutureBar", "EnterFutureBar", "x", "futurebar");
+                SetParameter("isSeated", isSitting);
+                SetParameter("Glass", futureBarGlass1);
+                AnimateSim("OrderDrink");
+                Slots.AttachToSlot(futureBarGlass1.ObjectId, Target.ObjectId, 2820733094, true);
+                VisualEffect.FireOneShotEffect("ep11BarDrinkPoof_main", Target, Slot.FXJoint_0, VisualEffect.TransitionType.SoftTransition);
+                futureBarGlass1.FadeIn();
+                if (definition.ServingType == FutureBar.ServingType.Servo)
+                {
+                    FutureBar.DoServoJuiceAction(Actor, futureBarGlass1, isSitting);
+                }
+                else
+                {
+                    if (definition.IsMultipleServing)
+                    {
+                        Sims3.Gameplay.Core.Lot lotCurrent = Actor.LotCurrent;
+                        EventTracker.SendEvent(EventTypeId.kOrderedARound, Actor, Target);
+                        foreach (FutureBar futureBar in lotCurrent.GetObjects<FutureBar>())
+                        {
+                            if (futureBar != Target)
+                            {
+                                gameObject = GameObject.GetObject(FutureBar.ContainmentSlotInUse(futureBar));
+                                if (gameObject != null)
+                                {
+                                    gameObject.FadeOut();
+                                    gameObject.Destroy();
+                                }
+                                FutureBar.FutureBarGlass futureBarGlass2 = GlobalFunctions.CreateObjectOutOfWorld("accessoryGlassEP11", ProductVersion.EP11) as FutureBar.FutureBarGlass;
+                                if (definition.DrinkName == "ServoJuice")
+                                {
+                                    futureBarGlass2.SetGeometryState("servojuice");
+                                    futureBarGlass2.mCurrentGeoState = "servojuice";
+                                    futureBarGlass2.mCurrentMatState = "drinkAqua";
+                                }
+                                else
+                                {
+                                    futureBarGlass2.SetGeometryState("full");
+                                    futureBarGlass2.SetMaterial(materialStateName);
+                                    futureBarGlass2.mCurrentGeoState = "full";
+                                    futureBarGlass2.mCurrentMatState = materialStateName;
+                                }
+                                futureBarGlass2.AddToWorld();
+                                futureBarGlass2.Contents.mDrinkName = definition.DrinkName;
+                                futureBarGlass2.Contents.mObjectCreatorId = futureBar.ObjectId;
+                                OrderDrinks orderDrinks = SingletonRoundPush.CreateInstance(futureBar, null, new InteractionPriority(InteractionPriorityLevel.NonCriticalNPCBehavior), true, true) as OrderDrinks;
+                                orderDrinks.SetDrinkNameAndColor(definition.ServingType, definition.DrinkName, definition.DrinkColor, futureBarGlass2.ObjectId);
+                                orderDrinks.Run();
+                            }
+                        }
+                    }
+                    AnimateSim("ExitFutureBar");
+                    if (Actor.SimDescription.IsEP11Bot && definition.DrinkName == "ServoJuice")
+                    {
+                        FutureBar.DoServoJuiceAction(Actor, futureBarGlass1, isSitting);
+                    }
+                    else if (!Actor.SimDescription.IsEP11Bot && definition.DrinkName != "ServoJuice" && CarrySystem.PickUpWithoutRouting(Actor, futureBarGlass1, true))
+                    {
+                        futureBarGlass1.PushDrinkAsContinuation(Actor);
+                    }
+                }
+                EndCommodityUpdates(true);
+                StandardExit();
+                EventTracker.SendEvent(EventTypeId.kOrderedSynthDrink, Actor, Target);
+                return true;
             }
         }
 
