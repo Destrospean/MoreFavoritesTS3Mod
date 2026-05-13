@@ -10,23 +10,11 @@ namespace Destrospean.MoreFavorites
 {
     public static class FavoritesUtils
     {
-        static List<uint> sFavoriteColorList;
-
         static Dictionary<FavoriteFoodType, FavoriteFood> sFavoriteFoodDictionary;
 
         static Dictionary<FavoriteMusicType, FavoriteMusic> sFavoriteMusicDictionary;
 
-        public static List<uint> FavoriteColorList
-        {
-            get
-            {
-                if (sFavoriteColorList == null)
-                {
-                    InitFavorites();
-                }
-                return sFavoriteColorList;
-            }
-        }
+        static List<string> sOriginalFavoriteColors;
 
         public static Dictionary<FavoriteFoodType, FavoriteFood> FavoriteFoodDictionary
         {
@@ -49,6 +37,18 @@ namespace Destrospean.MoreFavorites
                     InitFavorites();
                 }
                 return sFavoriteMusicDictionary;
+            }
+        }
+
+        public static List<string> OriginalFavoriteColors
+        {
+            get
+            {
+                if (sOriginalFavoriteColors == null)
+                {
+                    InitFavorites();
+                }
+                return sOriginalFavoriteColors;
             }
         }
 
@@ -357,7 +357,6 @@ namespace Destrospean.MoreFavorites
 
         public static void InitFavorites()
         {
-            List<uint> argbList = new List<uint>();
             List<CASCharacter.NameColorPair> favoriteColorList = new List<CASCharacter.NameColorPair>(CASCharacter.kColors);
             Dictionary<FavoriteFoodType, FavoriteFood> favoriteFoodDictionary = new Dictionary<FavoriteFoodType, FavoriteFood>();
             Dictionary<FavoriteMusicType, FavoriteMusic> favoriteMusicDictionary = new Dictionary<FavoriteMusicType, FavoriteMusic>();
@@ -382,9 +381,8 @@ namespace Destrospean.MoreFavorites
                             name = reader.GetAttribute("Name");
                             uint argb;
                             int startIndex;
-                            if (hex != null && name != null && uint.TryParse(("FFFFFFFF".Remove(0, hex.Length - (startIndex = hex.StartsWith("#") ? 1 : hex.StartsWith("0x") ? 2 : 0))) + hex.Substring(startIndex), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out argb))
+                            if (hex != null && name != null && uint.TryParse(("FFFFFFFF".Remove(0, hex.Length - (startIndex = hex.StartsWith("#") ? 1 : hex.StartsWith("0x") ? 2 : 0))) + hex.Substring(startIndex), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out argb) && !favoriteColorList.Exists(x => x.mName == name))
                             {
-                                argbList.Add(argb);
                                 favoriteColorList.Add(new CASCharacter.NameColorPair(name, new Color(argb)));
                             }
                         }
@@ -393,7 +391,7 @@ namespace Destrospean.MoreFavorites
                             Recipe recipe; 
                             if (Recipe.NameToRecipeHash.TryGetValue(reader.GetAttribute("Recipe_Key"), out recipe))
                             {
-                                favoriteFoodDictionary.Add((FavoriteFoodType)ResourceUtils.HashString32(recipe.ToString()), new FavoriteFood(recipe, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key")));
+                                favoriteFoodDictionary[(FavoriteFoodType)ResourceUtils.HashString32(recipe.ToString())] = new FavoriteFood(recipe, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"));
                             }
                         }
                         else if (reader.Name == "FavoriteMusic" || reader.Name == "FavouriteMusic")
@@ -401,15 +399,15 @@ namespace Destrospean.MoreFavorites
                             StereoStationData stereoStationData;
                             if (StereoStationData.sStereoStationDictionary.TryGetValue("Gameplay/Excel/Stereo/Stations:" + reader.GetAttribute("Station_Name"), out stereoStationData))
                             {
-                                favoriteMusicDictionary.Add((FavoriteMusicType)ResourceUtils.HashString32(stereoStationData.mStationName), new FavoriteMusic(stereoStationData, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key")));
+                                favoriteMusicDictionary[(FavoriteMusicType)ResourceUtils.HashString32(stereoStationData.mStationName)] = new FavoriteMusic(stereoStationData, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"));
                             }
                         }
                     }
                 }
                 reader.Close();
             }
+            sOriginalFavoriteColors = new List<string>(Array.ConvertAll(CASCharacter.kColors, x => x.mName));
             CASCharacter.kColors = favoriteColorList.ToArray();
-            sFavoriteColorList = argbList;
             sFavoriteFoodDictionary = favoriteFoodDictionary;
             sFavoriteMusicDictionary = favoriteMusicDictionary;
         }

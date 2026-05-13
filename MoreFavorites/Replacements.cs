@@ -327,7 +327,7 @@ namespace Destrospean.MoreFavorites
                     gameObject.Destroy();
                 }
                 string materialStateName = "drink" + definition.DrinkName;
-                if (FavoritesUtils.FavoriteColorList.Contains(definition.DrinkColor.ARGB))
+                if (!FavoritesUtils.OriginalFavoriteColors.Contains(definition.DrinkName))
                 {
                     materialStateName = "MoreFavs_" + FavoritesUtils.FindClosestColor(Array.ConvertAll(FavoritesUtils.FutureBarGlassRGBValues, x => new Color(x | 0xFF000000)), definition.DrinkColor).ARGB.ToString("X8").Substring(2);
                 }
