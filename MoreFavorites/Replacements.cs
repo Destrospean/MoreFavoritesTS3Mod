@@ -7,6 +7,7 @@ using Sims3.Gameplay.ActorSystems;
 using Sims3.Gameplay.Autonomy;
 using Sims3.Gameplay.EventSystem;
 using Sims3.Gameplay.Interactions;
+using Sims3.Gameplay.Interfaces;
 using Sims3.Gameplay.Objects.Appliances;
 using Sims3.Gameplay.Objects.CookingObjects;
 using Sims3.Gameplay.Objects.Counters;
@@ -22,7 +23,7 @@ namespace Destrospean.MoreFavorites
 {
     public static class Replacements
     {
-        public class EatHeldFood : Sims3.Gameplay.Objects.CookingObjects.EatHeldFood
+        public class EatHeldFoodPatch : EatHeldFood
         {
             public override bool Run()
             {
@@ -224,7 +225,7 @@ namespace Destrospean.MoreFavorites
                                 Actor.InteractionQueue.PushAsContinuation(CarrySystem.PutDownHeldObject.Singleton, Target, false, new InteractionPriority(InteractionPriorityLevel.UserDirected), true);
                             }
                         }
-                        Sims3.Gameplay.Interfaces.ISingleServingContainer singleServingContainer = Target as Sims3.Gameplay.Interfaces.ISingleServingContainer;
+                        ISingleServingContainer singleServingContainer = Target as ISingleServingContainer;
                         if (singleServingContainer != null && singleServingContainer.FromResortBuffetTable && !Actor.BuffManager.HasElement(BuffNames.Stuffed) && Actor.Motives.GetMotiveValue(CommodityKind.Hunger) <= (float)Sims3.Gameplay.Objects.Resort.ResortBuffetTable.kHungerToStopFeeding)
                         {
                             Sims3.Gameplay.Objects.Resort.ResortBuffetTable.ConsumeMoreFood(Actor);
@@ -254,7 +255,7 @@ namespace Destrospean.MoreFavorites
                 {
                     isSpoiledGlass = glass.Spoiled;
                 }
-                if (Actor.SimDescription.IsBonehilda && Target is Sims3.Gameplay.Interfaces.IGlass)
+                if (Actor.SimDescription.IsBonehilda && Target is IGlass)
                 {
                     Sims3.Gameplay.Controllers.PuddleManager.AddPuddle(Actor.Position);
                 }
@@ -294,7 +295,7 @@ namespace Destrospean.MoreFavorites
             }
         }
 
-        public class OrderDrinks : FutureBar.OrderDrinks
+        public class OrderDrinksPatch : FutureBar.OrderDrinks
         {
             public override bool Run()
             {
@@ -317,7 +318,7 @@ namespace Destrospean.MoreFavorites
                 {
                     return false;
                 }
-                bool isSitting = Actor.Posture is SittingPosture;
+                bool isSeated = Actor.Posture is SittingPosture;
                 StandardEntry();
                 BeginCommodityUpdates();
                 GameObject gameObject = GameObject.GetObject(FutureBar.ContainmentSlotInUse(Target));
@@ -350,7 +351,7 @@ namespace Destrospean.MoreFavorites
                 futureBarGlass1.Contents.mDrinkName = definition.DrinkName;
                 futureBarGlass1.Contents.mObjectCreatorId = Target.ObjectId;
                 EnterStateMachine("FutureBar", "EnterFutureBar", "x", "futurebar");
-                SetParameter("isSeated", isSitting);
+                SetParameter("isSeated", isSeated);
                 SetParameter("Glass", futureBarGlass1);
                 AnimateSim("OrderDrink");
                 Slots.AttachToSlot(futureBarGlass1.ObjectId, Target.ObjectId, 2820733094, true);
@@ -358,7 +359,7 @@ namespace Destrospean.MoreFavorites
                 futureBarGlass1.FadeIn();
                 if (definition.ServingType == FutureBar.ServingType.Servo)
                 {
-                    FutureBar.DoServoJuiceAction(Actor, futureBarGlass1, isSitting);
+                    FutureBar.DoServoJuiceAction(Actor, futureBarGlass1, isSeated);
                 }
                 else
                 {
@@ -393,7 +394,7 @@ namespace Destrospean.MoreFavorites
                                 futureBarGlass2.AddToWorld();
                                 futureBarGlass2.Contents.mDrinkName = definition.DrinkName;
                                 futureBarGlass2.Contents.mObjectCreatorId = futureBar.ObjectId;
-                                OrderDrinks orderDrinks = SingletonRoundPush.CreateInstance(futureBar, null, new InteractionPriority(InteractionPriorityLevel.NonCriticalNPCBehavior), true, true) as OrderDrinks;
+                                OrderDrinksPatch orderDrinks = SingletonRoundPush.CreateInstance(futureBar, null, new InteractionPriority(InteractionPriorityLevel.NonCriticalNPCBehavior), true, true) as OrderDrinksPatch;
                                 orderDrinks.SetDrinkNameAndColor(definition.ServingType, definition.DrinkName, definition.DrinkColor, futureBarGlass2.ObjectId);
                                 orderDrinks.Run();
                             }
@@ -402,7 +403,7 @@ namespace Destrospean.MoreFavorites
                     AnimateSim("ExitFutureBar");
                     if (Actor.SimDescription.IsEP11Bot && definition.DrinkName == "ServoJuice")
                     {
-                        FutureBar.DoServoJuiceAction(Actor, futureBarGlass1, isSitting);
+                        FutureBar.DoServoJuiceAction(Actor, futureBarGlass1, isSeated);
                     }
                     else if (!Actor.SimDescription.IsEP11Bot && definition.DrinkName != "ServoJuice" && CarrySystem.PickUpWithoutRouting(Actor, futureBarGlass1, true))
                     {
@@ -413,6 +414,89 @@ namespace Destrospean.MoreFavorites
                 StandardExit();
                 EventTracker.SendEvent(EventTypeId.kOrderedSynthDrink, Actor, Target);
                 return true;
+            }
+        }
+
+        public abstract class StereoPatch : Stereo
+        {
+            public new void AddEnjoyingMusicCallback(Sim sim, ReactionBroadcaster reactionBroadcaster)
+            {
+                if (!sim.IsPet)
+                {
+                    ulong id = 0;
+                    bool isPeripheralStereoSpeaker = false;
+                    Stereo stereo = reactionBroadcaster.BroadcastingObject as Stereo;
+                    IPeripheralStereoSpeaker peripheralStereoSpeaker = reactionBroadcaster.BroadcastingObject as IPeripheralStereoSpeaker;
+                    if (peripheralStereoSpeaker != null && stereo == null)
+                    {
+                        isPeripheralStereoSpeaker = true;
+                        stereo = peripheralStereoSpeaker.StereoMaster as Stereo;
+                        id = peripheralStereoSpeaker.ObjectId.Value;
+                    }
+                    else if (stereo != null)
+                    {
+                        id = stereo.ObjectId.Value;
+                    }
+                    if (sim.IsSleeping)
+                    {
+                        bool isDisturbed = true;
+                        if (mCurrentLotStereoRanking == 0 && sim.RoomId != RoomId)
+                        {
+                            foreach (IPeripheralStereoSpeaker mAdditionalSpeaker in mAdditionalSpeakers)
+                            {
+                                if (sim.RoomId == mAdditionalSpeaker.RoomId && !mAdditionalSpeaker.IsOn)
+                                {
+                                    isDisturbed = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (isDisturbed)
+                        {
+                            Sims3.Gameplay.InteractionsShared.ReactToDisturbance.NoiseBroadcastCallback(sim, reactionBroadcaster);
+                        }
+                    }
+                    else if (sim.LotCurrent == mLotCurrent)
+                    {
+                        int moodScore = 0;
+                        if (!isPeripheralStereoSpeaker || isPeripheralStereoSpeaker && peripheralStereoSpeaker.RoomId == stereo.RoomId)
+                        {
+                            moodScore += TuningStereo.MoodScoreForEnjoyMusicBuff + WallMountedSpeaker.SpeakerBoostForStereo(this);
+                        }
+                        else if (isPeripheralStereoSpeaker)
+                        {
+                            moodScore += peripheralStereoSpeaker.StandaloneMoodScore;
+                        }
+                        FavoritesUtils.FavoriteMusic favoriteMusic;
+                        if (mPlayingStationsData != null && (mPlayingStationsData.MusicType == sim.SimDescription.FavoriteMusic || FavoritesUtils.FavoriteMusicDictionary.TryGetValue(sim.SimDescription.FavoriteMusic, out favoriteMusic) && favoriteMusic.StereoStationData.mStationName == mPlayingStationsData.mStationName))
+                        {
+                            moodScore += BuffEnjoyingMusic.FavoriteMusicMoodScore;
+                        }
+                        if (Upgradable.SoupUpSpeakers)
+                        {
+                            moodScore += BuffEnjoyingMusic.IncreasedMoodScore;
+                        }
+                        sim.BuffManager.RemoveElement(BuffNames.EnjoyingMusic, id);
+                        sim.BuffManager.AddElement(BuffNames.EnjoyingMusic, moodScore, Origin.FromStereo, id);
+                        if (stereo != null && mPlayingStationsData != null && mPlayingStationsData.IsKidsStation)
+                        {
+                            if (!stereo.mSimsWithinStereoBroadcast.Contains(sim))
+                            {
+                                stereo.mSimsWithinStereoBroadcast.Add(sim);
+                            }
+                            if (sim.SimDescription.IsPregnant)
+                            {
+                                sim.SimDescription.Pregnancy.StartListeningKidsRadio();
+                            }
+                        }
+                    }
+                    sim.RemoveInteractionByType(typeof(DanceTogetherA.Definition));
+                    sim.AddInteraction(isPeripheralStereoSpeaker ? new DanceTogetherA.Definition(peripheralStereoSpeaker.GetIDanceable()) : new DanceTogetherA.Definition(stereo), true);
+                }
+                else if (sim.HasTrait(TraitNames.QuietPet))
+                {
+                    sim.BuffManager.AddElement(BuffNames.TooNoisyPet, Origin.FromStereo);
+                }
             }
         }
 
