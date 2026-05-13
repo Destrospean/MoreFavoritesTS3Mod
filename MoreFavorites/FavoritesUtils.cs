@@ -383,7 +383,7 @@ namespace Destrospean.MoreFavorites
                             int startIndex;
                             if (hex != null && name != null && uint.TryParse(("FFFFFFFF".Remove(0, hex.Length - (startIndex = hex.StartsWith("#") ? 1 : hex.StartsWith("0x") ? 2 : 0))) + hex.Substring(startIndex), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out argb) && !favoriteColorList.Exists(x => x.mName == name))
                             {
-                                favoriteColorList.Add(new CASCharacter.NameColorPair(name, new Color(argb)));
+                                favoriteColorList.Add(new CASCharacter.NameColorPair(name, new Color(argb | 0xFF000000)));
                             }
                         }
                         else if (reader.Name == "FavoriteFood" || reader.Name == "FavouriteFood")
