@@ -40,18 +40,6 @@ namespace Destrospean.MoreFavorites
             }
         }
 
-        public static List<string> OriginalFavoriteColors
-        {
-            get
-            {
-                if (sOriginalFavoriteColors == null)
-                {
-                    InitFavorites();
-                }
-                return sOriginalFavoriteColors;
-            }
-        }
-
         public static readonly uint[] FutureBarGlassRGBValues =
             {
                 0x000000,
@@ -311,6 +299,18 @@ namespace Destrospean.MoreFavorites
                 0xFFFFAA,
                 0xFFFFFF
             };
+
+        public static List<string> OriginalFavoriteColors
+        {
+            get
+            {
+                if (sOriginalFavoriteColors == null)
+                {
+                    InitFavorites();
+                }
+                return sOriginalFavoriteColors;
+            }
+        }
 
         public class FavoriteBase
         {
