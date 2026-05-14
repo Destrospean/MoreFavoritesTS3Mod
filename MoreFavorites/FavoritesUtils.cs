@@ -391,7 +391,7 @@ namespace Destrospean.MoreFavorites
                             Recipe recipe; 
                             if (Recipe.NameToRecipeHash.TryGetValue(reader.GetAttribute("Recipe_Key"), out recipe))
                             {
-                                favoriteFoodDictionary[(FavoriteFoodType)ResourceUtils.HashString32(recipe.ToString())] = new FavoriteFood(recipe, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"));
+                                favoriteFoodDictionary[(FavoriteFoodType)ResourceUtils.HashString32(recipe.Key)] = new FavoriteFood(recipe, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"));
                             }
                         }
                         else if (reader.Name == "FavoriteMusic" || reader.Name == "FavouriteMusic")
