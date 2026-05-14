@@ -11,4 +11,8 @@
   <!-- DO NOT REMOVE THE ENTRY BELOW -->
   <FavoriteMusic Station_Name="" Icon_Key="" Small_Icon_Key="" />
   <!-- DO NOT REMOVE THE ENTRY ABOVE -->
+
+  <!-- DO NOT REMOVE THE ENTRY BELOW -->
+  <Unfavorite Favorite_Type="Color|Food|Music" Name="[Name]|[Recipe_Key]|[Station_Name]" />
+  <!-- DO NOT REMOVE THE ENTRY BELOW -->
 </Favorites>

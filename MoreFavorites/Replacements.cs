@@ -583,12 +583,12 @@ namespace Destrospean.MoreFavorites
             List<FavoriteFoodType> favoriteFoodTypes = new List<FavoriteFoodType>();
             foreach (FavoriteFoodType foodType in Enum.GetValues(typeof(FavoriteFoodType)))
             {
-                if (foodType != FavoriteFoodType.VampireFood && foodType != FavoriteFoodType.Kelp && Responder.Instance.CASModel.GetRecipe(foodType) != null)
+                if (!FavoritesUtils.IsBlacklisted(foodType) && foodType != FavoriteFoodType.VampireFood && foodType != FavoriteFoodType.Kelp && Responder.Instance.CASModel.GetRecipe(foodType) != null)
                 {
                     favoriteFoodTypes.Add(foodType);
                 }
             }
-            favoriteFoodTypes.AddRange(FavoritesUtils.FavoriteFoodDictionary.Keys);
+            favoriteFoodTypes.AddRange(new List<FavoriteFoodType>(FavoritesUtils.FavoriteFoodDictionary.Keys).FindAll(x => !FavoritesUtils.IsBlacklisted(x)));
             return favoriteFoodTypes.ToArray();
         }
 
@@ -597,12 +597,12 @@ namespace Destrospean.MoreFavorites
             List<FavoriteMusicType> favoriteMusicTypes = new List<FavoriteMusicType>();
             foreach (FavoriteMusicType musicType in Enum.GetValues(typeof(FavoriteMusicType)))
             {
-                if (Responder.Instance.CASModel.IsMusicTypeInstalled(musicType))
+                if (!FavoritesUtils.IsBlacklisted(musicType) && Responder.Instance.CASModel.IsMusicTypeInstalled(musicType))
                 {
                     favoriteMusicTypes.Add(musicType);
                 }
             }
-            favoriteMusicTypes.AddRange(FavoritesUtils.FavoriteMusicDictionary.Keys);
+            favoriteMusicTypes.AddRange(new List<FavoriteMusicType>(FavoritesUtils.FavoriteMusicDictionary.Keys).FindAll(x => !FavoritesUtils.IsBlacklisted(x)));
             return favoriteMusicTypes.ToArray();
         }
 

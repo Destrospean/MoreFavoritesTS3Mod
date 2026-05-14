@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Security.Cryptography;
+using System.Xml;
 using Mono.Cecil;
 using s3pi.Interfaces;
 
@@ -38,6 +39,63 @@ namespace Destrospean.MoreFavorites_Generator
             THA_TH
         }
 
+        public static Bitmap Colorize(Bitmap source, Color color)
+        {
+            var result = new Bitmap(source.Width, source.Height);
+            using (var graphics = Graphics.FromImage(result))
+            {
+                var colorMatrix = new ColorMatrix(new float[][]
+                    {
+                        new[]
+                        {
+                            (float)color.R / byte.MaxValue,
+                            0,
+                            0,
+                            0,
+                            0
+                        },
+                        new[]
+                        {
+                            0,
+                            (float)color.G / byte.MaxValue,
+                            0,
+                            0,
+                            0
+                        },
+                        new[]
+                        {
+                            0,
+                            0,
+                            (float)color.B / byte.MaxValue,
+                            0,
+                            0
+                        },
+                        new float[]
+                        {
+                            0,
+                            0,
+                            0,
+                            1,
+                            0
+                        },
+                        new float[]
+                        {
+                            0,
+                            0,
+                            0,
+                            0,
+                            1
+                        }
+                    });
+                using (var attributes = new ImageAttributes())
+                {
+                    attributes.SetColorMatrix(colorMatrix);
+                    graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
+                }
+            }
+            return result;
+        }
+
         public static void Main(string[] args)
         {
             Console.Write("Specify a unique suffix for the batch of favorites entries (leave blank for a random number suffix): ");
@@ -52,7 +110,7 @@ namespace Destrospean.MoreFavorites_Generator
 
             // Get the assembly and XML
             AssemblyDefinition assembly = null;
-            var xmlDocument = new System.Xml.XmlDocument();
+            var xmlDocument = new XmlDocument();
             xmlDocument.Load(args.Length == 0 ? "_MoreFavorites_Base.xml" : args[0]);
             foreach (var resourceIndexEntry in basePackage.FindAll(x => x.Instance == FNV64.GetHash("MoreFavorites_Base")))
             {
@@ -64,38 +122,39 @@ namespace Destrospean.MoreFavorites_Generator
                 }
             }
 
+            // Get the icons for the white color
             Bitmap largeColorIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x8613BD10D6A2A88F))),
             smallColorIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x35B84649E916A075)));
 
-            // Return early if no assembly is found
-            if (assembly == null)
-            {
-                return;
-            }
-
             // Copy the elements from the XML to put into the new package
-            System.Xml.XmlNode rootNode = xmlDocument.SelectSingleNode("Favorites") ?? xmlDocument.SelectSingleNode("Favourites");
-            List<System.Xml.XmlElement> favoriteColorElements = new List<System.Xml.XmlElement>(),
-            favoriteFoodElements = new List<System.Xml.XmlElement>(),
-            favoriteMusicElements = new List<System.Xml.XmlElement>();
-            foreach (System.Xml.XmlNode node in rootNode.ChildNodes)
+            XmlNode rootNode = xmlDocument.SelectSingleNode("Favorites") ?? xmlDocument.SelectSingleNode("Favourites");
+            List<XmlElement> favoriteColorElements = new List<XmlElement>(),
+            favoriteFoodElements = new List<XmlElement>(),
+            favoriteMusicElements = new List<XmlElement>(),
+            unfavoriteElements = new List<XmlElement>();
+            foreach (XmlNode node in rootNode.ChildNodes)
             {
                 if ((node.Name == "FavoriteColor" || node.Name == "FavouriteColour") && !favoriteColorElements.Exists(x => node.Attributes["Name"].Value == x.GetAttribute("Name")))
                 {
-                    favoriteColorElements.Add((System.Xml.XmlElement)node);
+                    favoriteColorElements.Add((XmlElement)node);
                 }
                 if ((node.Name == "FavoriteFood" || node.Name == "FavouriteFood") && !favoriteFoodElements.Exists(x => node.Attributes["Recipe_Key"].Value == x.GetAttribute("Recipe_Key")))
                 {
-                    favoriteFoodElements.Add((System.Xml.XmlElement)node);
+                    favoriteFoodElements.Add((XmlElement)node);
                 }
                 if ((node.Name == "FavoriteMusic" || node.Name == "FavouriteMusic") && !favoriteMusicElements.Exists(x => node.Attributes["Station_Name"].Value == x.GetAttribute("Station_Name")))
                 {
-                    favoriteMusicElements.Add((System.Xml.XmlElement)node);
+                    favoriteMusicElements.Add((XmlElement)node);
+                }
+                if ((node.Name == "Unfavorite" || node.Name == "Unfavourite") && !unfavoriteElements.Exists(x => node.Attributes["Name"].Value == x.GetAttribute("Name") && (((XmlElement)node).GetAttribute("Favorite_Type") ?? ((XmlElement)node).GetAttribute("Favourite_Type")) == (x.GetAttribute("Favorite_Type") ?? x.GetAttribute("Favourite_Type"))))
+                {
+                    unfavoriteElements.Add((XmlElement)node);
                 }
             }
             favoriteColorElements.RemoveAt(0);
             favoriteFoodElements.RemoveAt(0);
             favoriteMusicElements.RemoveAt(0);
+            unfavoriteElements.RemoveAt(0);
             rootNode.RemoveAll();
             foreach (var favoriteColorElement in favoriteColorElements)
             {
@@ -108,6 +167,10 @@ namespace Destrospean.MoreFavorites_Generator
             foreach (var favoriteMusicElement in favoriteMusicElements)
             {
                 rootNode.AppendChild(favoriteMusicElement);
+            }
+            foreach (var unfavoriteElement in unfavoriteElements)
+            {
+                rootNode.AppendChild(unfavoriteElement);
             }
 
             // Rename the assembly for the new package
@@ -154,8 +217,8 @@ namespace Destrospean.MoreFavorites_Generator
                 {
                     Stream largeIMAGStream = new MemoryStream(),
                     smallIMAGStream = new MemoryStream();
-                    TintBitmap(largeColorIMAG, Color.FromArgb((int)(argb | 0xFF000000)), 1).Save(largeIMAGStream, ImageFormat.Png);
-                    TintBitmap(smallColorIMAG, Color.FromArgb((int)(argb | 0xFF000000)), 1).Save(smallIMAGStream, ImageFormat.Png);
+                    Colorize(largeColorIMAG, Color.FromArgb((int)(argb | 0xFF000000))).Save(largeIMAGStream, ImageFormat.Png);
+                    Colorize(smallColorIMAG, Color.FromArgb((int)(argb | 0xFF000000))).Save(smallIMAGStream, ImageFormat.Png);
                     newPackage.AddResource(new ResourceKey(0x2F7D0004, 0, largeIMAGKeyInstance), largeIMAGStream, true);
                     newPackage.AddResource(new ResourceKey(0x2F7D0004, 0, smallIMAGKeyInstance), smallIMAGStream, true);
                     nameMapResource.Add(largeIMAGKeyInstance, imageKeyInstanceBase + "_r2");
@@ -172,66 +235,6 @@ namespace Destrospean.MoreFavorites_Generator
 
             // Save the new package with the new name
             newPackage.SaveAs(assemblyName + ".package");
-        }
-
-        public static Bitmap TintBitmap(Bitmap source, Color tintColor, float intensity)
-        {
-            var result = new Bitmap(source.Width, source.Height);
-            using (var graphics = Graphics.FromImage(result))
-            {
-                float r = tintColor.R / 255f * intensity,
-                g = tintColor.G / 255f * intensity,
-                b = tintColor.B / 255f * intensity;
-                var colorMatrix = new ColorMatrix(new float[][]
-                    {
-                        new float[]
-                        {
-                            r,
-                            0,
-                            0,
-                            0,
-                            0
-                        },
-                        new float[]
-                        {
-                            0,
-                            g,
-                            0,
-                            0,
-                            0
-                        },
-                        new float[]
-                        {
-                            0,
-                            0,
-                            b,
-                            0,
-                            0
-                        },
-                        new float[]
-                        {
-                            0,
-                            0,
-                            0,
-                            1,
-                            0
-                        },
-                        new float[]
-                        {
-                            0,
-                            0,
-                            0,
-                            0,
-                            1
-                        }
-                    });
-                using (var attributes = new ImageAttributes())
-                {
-                    attributes.SetColorMatrix(colorMatrix);
-                    graphics.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, attributes);
-                }
-            }
-            return result;
         }
     }
 }
