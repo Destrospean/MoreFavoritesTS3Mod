@@ -9,7 +9,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>Library</OutputType>
     <RootNamespace>Destrospean.MoreFavorites</RootNamespace>
-    <AssemblyName>MoreFavorites</AssemblyName>
+    <AssemblyName>Destrospean.MoreFavorites</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <NoWin32Manifest>False</NoWin32Manifest>
@@ -54,6 +54,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="FavoritesUtils.cs" />
     <Compile Include="Replacements.cs" />
+    <Compile Include="ExtensionAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib">

@@ -324,17 +324,17 @@ namespace Destrospean.MoreFavorites
             return Math.Sqrt(Math.Pow(a.Red - b.Red, 2) + Math.Pow(a.Green - b.Green, 2) + Math.Pow(a.Blue - b.Blue, 2));
         }
 
-        public static bool IsBlacklisted(string colorName)
+        public static bool IsBlacklisted(this CASCharacter.NameColorPair nameColorPair)
         {
-            return FavoriteColorBlacklist.Contains(colorName);
+            return FavoriteColorBlacklist.Contains(nameColorPair.mName);
         }
 
-        public static bool IsBlacklisted(FavoriteFoodType foodType)
+        public static bool IsBlacklisted(this FavoriteFoodType foodType)
         {
             return FavoriteFoodBlacklist.Contains(foodType);
         }
 
-        public static bool IsBlacklisted(FavoriteMusicType musicType)
+        public static bool IsBlacklisted(this FavoriteMusicType musicType)
         {
             return FavoriteMusicBlacklist.Contains(musicType);
         }
@@ -406,7 +406,7 @@ namespace Destrospean.MoreFavorites
                 }
                 reader.Close();
             }
-            CASCharacter.kColors = favoriteColorList.FindAll(x => !IsBlacklisted(x.mName)).ToArray();
+            CASCharacter.kColors = favoriteColorList.ToArray();
         }
     }
 }

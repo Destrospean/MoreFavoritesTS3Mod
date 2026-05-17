@@ -11,6 +11,7 @@ namespace Destrospean.MoreFavorites
 
         static Main()
         {
+            BindingFlags nonPublicInstance = BindingFlags.NonPublic | BindingFlags.Instance;
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFood"), typeof(Replacements).GetMethod("GetFavoriteFood"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodName", BindingFlags.NonPublic | BindingFlags.Static), typeof(Replacements).GetMethod("GetFavoriteFood"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetFavoriteFoodPngName"), typeof(Replacements).GetMethod("GetFavoriteFoodPngName"));
@@ -22,16 +23,22 @@ namespace Destrospean.MoreFavorites
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetInstalledFavoriteFoodList"), typeof(Replacements).GetMethod("GetInstalledFavoriteFoodList"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetInstalledFavoriteMusicList"), typeof(Replacements).GetMethod("GetInstalledFavoriteMusicList"));
             ReplaceMethod(typeof(CASCharacter).GetMethod("GetMusicIcon", BindingFlags.NonPublic | BindingFlags.Static), typeof(Replacements).GetMethod("GetMusicIcon"));
+            ReplaceMethod(typeof(CASCharacter).GetMethod("OnFavoritesVisibilityChange", nonPublicInstance), typeof(Replacements).GetMethod("OnFavoritesVisibilityChange"));
+            ReplaceMethod(typeof(CASCharacter).GetMethod("RandomizeAllFavorites"), typeof(Replacements).GetMethod("RandomizeAllFavorites"));
             ReplaceMethod(typeof(Sims3.Gameplay.CAS.CASLogic).GetMethod("GetRecipe"), typeof(Replacements).GetMethod("GetRecipe"));
-            ReplaceMethod(typeof(Sims3.Gameplay.Objects.CookingObjects.EatHeldFood).GetMethod("Run", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Replacements.EatHeldFoodPatch).GetMethod("Run"));
-            ReplaceMethod(typeof(Sims3.Gameplay.Objects.Appliances.FutureBar.OrderDrinks).GetMethod("Run", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Replacements.OrderDrinksPatch).GetMethod("Run"));
-            ReplaceMethod(typeof(Sims3.Gameplay.Objects.Electronics.Stereo).GetMethod("AddEnjoyingMusicCallback", BindingFlags.NonPublic | BindingFlags.Instance), typeof(Replacements.StereoPatch).GetMethod("AddEnjoyingMusicCallback"));
+            ReplaceMethod(typeof(Sims3.UI.ChangeFavoritesDialog).GetMethod("OnFavoritesVisibilityChange", nonPublicInstance), typeof(Replacements.ChangeFavoritesDialogPatch).GetMethod("OnFavoritesVisibilityChange"));
+            ReplaceMethod(typeof(Sims3.UI.ChangeFavoritesDialog).GetMethod("RandomizeAllFavorites", nonPublicInstance), typeof(Replacements.ChangeFavoritesDialogPatch).GetMethod("RandomizeAllFavorites"));
+            ReplaceMethod(typeof(Sims3.Gameplay.Objects.CookingObjects.EatHeldFood).GetMethod("Run", nonPublicInstance), typeof(Replacements.EatHeldFoodPatch).GetMethod("Run"));
+            ReplaceMethod(typeof(Sims3.Gameplay.Objects.Appliances.FutureBar.OrderDrinks).GetMethod("Run", nonPublicInstance), typeof(Replacements.OrderDrinksPatch).GetMethod("Run"));
+            ReplaceMethod(typeof(Sims3.Gameplay.CAS.SimDescription).GetMethod("RandomizeFavoriteMusic", nonPublicInstance), typeof(Replacements).GetMethod("RandomizeFavoriteMusic"));
+            ReplaceMethod(typeof(Sims3.Gameplay.CAS.SimDescription).GetMethod("RandomizePreferences"), typeof(Replacements).GetMethod("RandomizePreferences"));
+            ReplaceMethod(typeof(Sims3.Gameplay.Objects.Electronics.Stereo).GetMethod("AddEnjoyingMusicCallback", nonPublicInstance), typeof(Replacements.StereoPatch).GetMethod("AddEnjoyingMusicCallback"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.Electronics.StereoStationData).GetMethod("GetStationName"), typeof(Replacements).GetMethod("GetStationName"));
             Sims3.SimIFace.World.sOnWorldLoadFinishedEventHandler += (sender, e) => FavoritesUtils.InitFavorites();
         }
 
         /// <summary>This method was borrowed from Lazy Duchess' Mono Patcher</summary>
-        static void ReplaceMethod(MethodInfo oldMethod, MethodInfo newMethod)
+        public static void ReplaceMethod(MethodInfo oldMethod, MethodInfo newMethod)
         {
             unsafe
             {
