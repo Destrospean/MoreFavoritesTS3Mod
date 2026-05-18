@@ -285,9 +285,9 @@ namespace Destrospean.MoreFavorites
 
         public class FavoriteBase
         {
-            public readonly string[] Children;
+            public string[] Children;
 
-            public readonly string IconKey, Name, SmallIconKey;
+            public string IconKey, Name, SmallIconKey;
 
             public FavoriteBase(string name, string iconKey, string smallIconKey, string children)
             {
@@ -300,20 +300,24 @@ namespace Destrospean.MoreFavorites
 
         public class FavoriteFood : FavoriteBase
         {
-            public readonly Recipe Recipe;
+            public Recipe Recipe;
 
             public FavoriteFood(string name, Recipe recipe, string iconKey, string smallIconKey, string children) : base(name, iconKey, smallIconKey, children)
             {
+                IconKey = string.IsNullOrEmpty(iconKey) ? "cas_favs_food_i_" + name : iconKey;
                 Recipe = recipe;
+                SmallIconKey = string.IsNullOrEmpty(smallIconKey) ? "cas_favs_food_i_" + name + "_s" : smallIconKey;
             }
         }
 
         public class FavoriteMusic : FavoriteBase
         {
-            public readonly StereoStationData StereoStationData;
+            public StereoStationData StereoStationData;
 
             public FavoriteMusic(string name, StereoStationData stereoStationData, string iconKey, string smallIconKey, string children) : base(name, iconKey, smallIconKey, children)
             {
+                IconKey = string.IsNullOrEmpty(iconKey) ? "cas_favs_music_i_" + name.Split(':')[1] : iconKey;
+                SmallIconKey = string.IsNullOrEmpty(smallIconKey) ? "cas_favs_music_i_" + name.Split(':')[1] + "_s" : smallIconKey;
                 StereoStationData = stereoStationData;
             }
         }
