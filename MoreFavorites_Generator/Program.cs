@@ -124,7 +124,11 @@ namespace Destrospean.MoreFavorites_Generator
 
             // Get the icons for the white color
             Bitmap largeColorIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x8613BD10D6A2A88F))),
-            smallColorIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x35B84649E916A075)));
+            largeFoodIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x06C597356E005A84))),
+            largeMusicIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0xD855091FEF17D3F7))),
+            smallColorIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x35B84649E916A075))),
+            smallFoodIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0xB5670F19A83E8822))),
+            smallMusicIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x10C3F84F0EE4A06D)));
 
             // Copy the elements from the XML to put into the new package
             XmlNode rootNode = xmlDocument.SelectSingleNode("Favorites") ?? xmlDocument.SelectSingleNode("Favourites");
@@ -224,6 +228,38 @@ namespace Destrospean.MoreFavorites_Generator
                     nameMapResource.Add(largeIMAGKeyInstance, imageKeyInstanceBase + "_r2");
                     nameMapResource.Add(smallIMAGKeyInstance, imageKeyInstanceBase + "_s_r2");
                 }
+            }
+            foreach (var favoriteFoodElement in favoriteFoodElements)
+            {
+                string name = favoriteFoodElement.GetAttribute("Recipe_Key") ?? "",
+                largeIMAGKey = string.IsNullOrEmpty(favoriteFoodElement.GetAttribute("Icon_Key")) ? "cas_favs_food_i_" + name : favoriteFoodElement.GetAttribute("Icon_Key"),
+                smallIMAGKey = string.IsNullOrEmpty(favoriteFoodElement.GetAttribute("Small_Icon_Key")) ? "cas_favs_food_i_" + name + "_s" : favoriteFoodElement.GetAttribute("Small_Icon_Key");
+                ulong largeIMAGKeyInstance = FNV64.GetHash(largeIMAGKey),
+                smallIMAGKeyInstance = FNV64.GetHash(smallIMAGKey);
+                Stream largeIMAGStream = new MemoryStream(),
+                smallIMAGStream = new MemoryStream();
+                largeFoodIMAG.Save(largeIMAGStream, ImageFormat.Png);
+                smallFoodIMAG.Save(smallIMAGStream, ImageFormat.Png);
+                newPackage.AddResource(new ResourceKey(0x2F7D0004, 0, largeIMAGKeyInstance), largeIMAGStream, true);
+                newPackage.AddResource(new ResourceKey(0x2F7D0004, 0, smallIMAGKeyInstance), smallIMAGStream, true);
+                nameMapResource.Add(largeIMAGKeyInstance, largeIMAGKey);
+                nameMapResource.Add(smallIMAGKeyInstance, smallIMAGKey);
+            }
+            foreach (var favoriteMusicElement in favoriteMusicElements)
+            {
+                string name = favoriteMusicElement.GetAttribute("Station_Name") ?? "",
+                largeIMAGKey = string.IsNullOrEmpty(favoriteMusicElement.GetAttribute("Icon_Key")) ? "cas_favs_music_i_" + name : favoriteMusicElement.GetAttribute("Icon_Key"),
+                smallIMAGKey = string.IsNullOrEmpty(favoriteMusicElement.GetAttribute("Small_Icon_Key")) ? "cas_favs_music_i_" + name + "_s" : favoriteMusicElement.GetAttribute("Small_Icon_Key");
+                ulong largeIMAGKeyInstance = FNV64.GetHash(largeIMAGKey),
+                smallIMAGKeyInstance = FNV64.GetHash(smallIMAGKey);
+                Stream largeIMAGStream = new MemoryStream(),
+                smallIMAGStream = new MemoryStream();
+                largeMusicIMAG.Save(largeIMAGStream, ImageFormat.Png);
+                smallMusicIMAG.Save(smallIMAGStream, ImageFormat.Png);
+                newPackage.AddResource(new ResourceKey(0x2F7D0004, 0, largeIMAGKeyInstance), largeIMAGStream, true);
+                newPackage.AddResource(new ResourceKey(0x2F7D0004, 0, smallIMAGKeyInstance), smallIMAGStream, true);
+                nameMapResource.Add(largeIMAGKeyInstance, largeIMAGKey);
+                nameMapResource.Add(smallIMAGKeyInstance, smallIMAGKey);
             }
             nameMapResource.Add(s3saKeyInstance, assemblyName);
             newPackage.AddResource(new ResourceKey(0x166038C, 0, 0), nameMapResource.Stream, true);
