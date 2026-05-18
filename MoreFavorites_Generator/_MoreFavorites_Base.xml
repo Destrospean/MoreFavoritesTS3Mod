@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <Favorites>
   <!-- DO NOT REMOVE THE ENTRY BELOW -->
-  <FavoriteColor Name="" Hex="" Display_Name="" Drink_Display_Name="" />
+  <FavoriteColor Name="" Hex="#000000" Display_Name="" Drink_Display_Name="" Children="Name1,Name2,Name3" />
   <!-- DO NOT REMOVE THE ENTRY ABOVE -->
 
   <!-- DO NOT REMOVE THE ENTRY BELOW -->
-  <FavoriteFood Recipe_Key="" Icon_Key="" Small_Icon_Key="" />
+  <FavoriteFood Recipe_Key="" Icon_Key="" Small_Icon_Key="" Children="Recipe_Key1,Recipe_Key2,Recipe_Key3" />
   <!-- DO NOT REMOVE THE ENTRY ABOVE -->
 
   <!-- DO NOT REMOVE THE ENTRY BELOW -->
-  <FavoriteMusic Station_Name="" Icon_Key="" Small_Icon_Key="" />
+  <FavoriteMusic Station_Name="" Icon_Key="" Small_Icon_Key="" Children="Station_Name1,Station_Name2,Station_Name3" />
   <!-- DO NOT REMOVE THE ENTRY ABOVE -->
 
   <!-- DO NOT REMOVE THE ENTRY BELOW -->
-  <Unfavorite Favorite_Type="Color|Food|Music" Name="[Name]|[Recipe_Key]|[Station_Name]" />
+  <Unfavorite Favorite_Type="Color|Food|Music" Name="[Name|Recipe_Key|Station_Name]" />
   <!-- DO NOT REMOVE THE ENTRY BELOW -->
 </Favorites>

@@ -10,16 +10,18 @@ namespace Destrospean.MoreFavorites
 {
     public static class FavoritesUtils
     {
-        public static List<string> FavoriteColorBlacklist = new List<string>(),
+        public static readonly List<string> FavoriteColorBlacklist = new List<string>(),
         OriginalFavoriteColors = new List<string>(Array.ConvertAll(CASCharacter.kColors, x => x.mName));
 
-        public static List<FavoriteFoodType> FavoriteFoodBlacklist = new List<FavoriteFoodType>();
+        public static readonly List<FavoriteFoodType> FavoriteFoodBlacklist = new List<FavoriteFoodType>();
 
-        public static List<FavoriteMusicType> FavoriteMusicBlacklist = new List<FavoriteMusicType>();
+        public static readonly List<FavoriteMusicType> FavoriteMusicBlacklist = new List<FavoriteMusicType>();
 
-        public static Dictionary<FavoriteFoodType, FavoriteFood> FavoriteFoodDictionary = new Dictionary<FavoriteFoodType, FavoriteFood>();
+        public static readonly Dictionary<string, string[]> FavoriteColorChildrenDictionary = new Dictionary<string, string[]>();
 
-        public static Dictionary<FavoriteMusicType, FavoriteMusic> FavoriteMusicDictionary = new Dictionary<FavoriteMusicType, FavoriteMusic>();
+        public static readonly Dictionary<FavoriteFoodType, FavoriteFood> FavoriteFoodDictionary = new Dictionary<FavoriteFoodType, FavoriteFood>();
+
+        public static readonly Dictionary<FavoriteMusicType, FavoriteMusic> FavoriteMusicDictionary = new Dictionary<FavoriteMusicType, FavoriteMusic>();
 
         public static readonly uint[] FutureBarGlassRGBValues =
             {
@@ -283,11 +285,15 @@ namespace Destrospean.MoreFavorites
 
         public class FavoriteBase
         {
-            public readonly string IconKey, SmallIconKey;
+            public readonly string[] Children;
 
-            public FavoriteBase(string iconKey, string smallIconKey)
+            public readonly string IconKey, Name, SmallIconKey;
+
+            public FavoriteBase(string name, string iconKey, string smallIconKey, string children)
             {
+                Children = Array.ConvertAll(children.Split(','), x => x.TrimStart());
                 IconKey = iconKey;
+                Name = name;
                 SmallIconKey = smallIconKey;
             }
         }
@@ -296,7 +302,7 @@ namespace Destrospean.MoreFavorites
         {
             public readonly Recipe Recipe;
 
-            public FavoriteFood(Recipe recipe, string iconKey, string smallIconKey) : base(iconKey, smallIconKey)
+            public FavoriteFood(string name, Recipe recipe, string iconKey, string smallIconKey, string children) : base(name, iconKey, smallIconKey, children)
             {
                 Recipe = recipe;
             }
@@ -306,7 +312,7 @@ namespace Destrospean.MoreFavorites
         {
             public readonly StereoStationData StereoStationData;
 
-            public FavoriteMusic(StereoStationData stereoStationData, string iconKey, string smallIconKey) : base(iconKey, smallIconKey)
+            public FavoriteMusic(string name, StereoStationData stereoStationData, string iconKey, string smallIconKey, string children) : base(name, iconKey, smallIconKey, children)
             {
                 StereoStationData = stereoStationData;
             }
@@ -366,23 +372,20 @@ namespace Destrospean.MoreFavorites
                             if (hex != null && name != null && uint.TryParse(("FFFFFFFF".Remove(0, hex.Length - (startIndex = hex.StartsWith("#") ? 1 : hex.StartsWith("0x") ? 2 : 0))) + hex.Substring(startIndex), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out argb) && !favoriteColorList.Exists(x => x.mName == name))
                             {
                                 favoriteColorList.Add(new CASCharacter.NameColorPair(name, new Color(argb | 0xFF000000)));
+                                FavoriteColorChildrenDictionary.Add(name, Array.ConvertAll((reader.GetAttribute("Children") ?? "").Split(','), x => x.TrimStart()));
                             }
                         }
                         else if (reader.Name == "FavoriteFood" || reader.Name == "FavouriteFood")
                         {
-                            Recipe recipe; 
-                            if (Recipe.NameToRecipeHash.TryGetValue(reader.GetAttribute("Recipe_Key"), out recipe))
-                            {
-                                FavoriteFoodDictionary[(FavoriteFoodType)ResourceUtils.HashString32(recipe.Key)] = new FavoriteFood(recipe, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"));
-                            }
+                            string recipeKey = reader.GetAttribute("Recipe_Key") ?? "";
+                            Recipe recipe;
+                            FavoriteFoodDictionary[(FavoriteFoodType)ResourceUtils.HashString32(recipeKey)] = new FavoriteFood(recipeKey, Recipe.NameToRecipeHash.TryGetValue(recipeKey, out recipe) ? recipe : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Children") ?? "");
                         }
                         else if (reader.Name == "FavoriteMusic" || reader.Name == "FavouriteMusic")
                         {
+                            string stationName = "Gameplay/Excel/Stereo/Stations:" + (reader.GetAttribute("Station_Name") ?? "");
                             StereoStationData stereoStationData;
-                            if (StereoStationData.sStereoStationDictionary.TryGetValue("Gameplay/Excel/Stereo/Stations:" + reader.GetAttribute("Station_Name"), out stereoStationData))
-                            {
-                                FavoriteMusicDictionary[(FavoriteMusicType)ResourceUtils.HashString32(stereoStationData.mStationName)] = new FavoriteMusic(stereoStationData, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"));
-                            }
+                            FavoriteMusicDictionary[(FavoriteMusicType)ResourceUtils.HashString32(stationName)] = new FavoriteMusic(stationName, StereoStationData.sStereoStationDictionary.TryGetValue(stationName, out stereoStationData) ? stereoStationData : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Children") ?? "");
                         }
                         else if (reader.Name == "Unfavorite" || reader.Name == "Unfavourite")
                         {
