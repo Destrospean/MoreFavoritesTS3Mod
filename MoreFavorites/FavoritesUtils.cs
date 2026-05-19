@@ -316,8 +316,8 @@ namespace Destrospean.MoreFavorites
 
             public FavoriteMusic(string name, StereoStationData stereoStationData, string iconKey, string smallIconKey, string children) : base(name, iconKey, smallIconKey, children)
             {
-                IconKey = string.IsNullOrEmpty(iconKey) ? "cas_favs_music_i_" + name.Split(':')[1] : iconKey;
-                SmallIconKey = string.IsNullOrEmpty(smallIconKey) ? "cas_favs_music_i_" + name.Split(':')[1] + "_s" : smallIconKey;
+                IconKey = string.IsNullOrEmpty(iconKey) ? "cas_favs_music_i_" + name : iconKey;
+                SmallIconKey = string.IsNullOrEmpty(smallIconKey) ? "cas_favs_music_i_" + name + "_s" : smallIconKey;
                 StereoStationData = stereoStationData;
             }
         }
@@ -387,9 +387,9 @@ namespace Destrospean.MoreFavorites
                         }
                         else if (reader.Name == "FavoriteMusic" || reader.Name == "FavouriteMusic")
                         {
-                            string stationName = "Gameplay/Excel/Stereo/Stations:" + (reader.GetAttribute("Station_Name") ?? "");
+                            string stationName = reader.GetAttribute("Station_Name") ?? "";
                             StereoStationData stereoStationData;
-                            FavoriteMusicDictionary[(FavoriteMusicType)ResourceUtils.HashString32(stationName)] = new FavoriteMusic(stationName, StereoStationData.sStereoStationDictionary.TryGetValue(stationName, out stereoStationData) ? stereoStationData : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Children") ?? "");
+                            FavoriteMusicDictionary[(FavoriteMusicType)ResourceUtils.HashString32("Gameplay/Excel/Stereo/Stations:" + stationName)] = new FavoriteMusic(stationName, StereoStationData.sStereoStationDictionary.TryGetValue("Gameplay/Excel/Stereo/Stations:" + stationName, out stereoStationData) ? stereoStationData : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Children") ?? "");
                         }
                         else if (reader.Name == "Unfavorite" || reader.Name == "Unfavourite")
                         {

@@ -65,6 +65,68 @@ namespace Destrospean.MoreFavorites
                 }
             }
 
+            public new void PopulateFavoritesGrid(ItemGrid grid, Array favoritesList, int startIndex, int endIndex)
+            {
+                grid.Clear();
+                grid.ForceCellTooltips = true;
+                Color mFavoriteColor = mResult.mFavoriteColor;
+                for (int i = startIndex; i < endIndex; i++)
+                {
+                    object favorite = favoritesList.GetValue(i);
+                    Layout layout = UIManager.LoadLayout(ResourceKey.CreateUILayoutKey("FavoritesGridItem", 0));
+                    Window window = (Window)layout.GetWindowByExportID(1);
+                    ImageDrawable imageDrawable = (ImageDrawable)((Window)window.GetChildByID(32, false)).Drawable;
+                    bool isCurrentFavorite = false;
+                    if (favorite is FavoriteFoodType)
+                    {
+                        FavoriteFoodType favoriteFoodType = (FavoriteFoodType)favorite;
+                        IRecipe recipe = Responder.Instance.CASModel.GetRecipe(favoriteFoodType);
+                        if (recipe != null)
+                        {
+                            if (!mSim.IsVegetarian)
+                            {
+                                window.TooltipText = recipe.GenericName;
+                            }
+                            else
+                            {
+                                if (!recipe.IsVegetarian && !recipe.HasVegetarianAlternative)
+                                {
+                                    continue;
+                                }
+                                window.TooltipText = recipe.GenericVegetarianName;
+                            }
+                            imageDrawable.Image = CASCharacter.GetFavoriteFoodIcon(favoriteFoodType);
+                            isCurrentFavorite = favoriteFoodType == mResult.mFavoriteFood;
+                        }
+                        else if (FavoritesUtils.FavoriteFoodDictionary.ContainsKey(favoriteFoodType))
+                        {
+                            window.TooltipText = Responder.Instance.LocalizationModel.LocalizeString("Gameplay/Excel/RecipeMasterList/Data:" + FavoritesUtils.FavoriteFoodDictionary[favoriteFoodType].Name);
+                            imageDrawable.Image = CASCharacter.GetFavoriteFoodIcon(favoriteFoodType);
+                            isCurrentFavorite = favoriteFoodType == mResult.mFavoriteFood;
+                        }
+                    }
+                    else if (favorite is FavoriteMusicType)
+                    {
+                        FavoriteMusicType favoriteMusicType = (FavoriteMusicType)favorite;
+                        window.TooltipText = CASCharacter.GetFavoriteMusicName(favoriteMusicType);
+                        imageDrawable.Image = CASCharacter.GetFavoriteMusicIcon(favoriteMusicType);
+                        isCurrentFavorite = favoriteMusicType == mResult.mFavoriteMusic;
+                    }
+                    else if (favorite is CASCharacter.NameColorPair)
+                    {
+                        CASCharacter.NameColorPair nameColorPair = (CASCharacter.NameColorPair)favorite;
+                        window.TooltipText = CASCharacter.GetLocalizedColorName(nameColorPair.mName);
+                        imageDrawable.Image = CASCharacter.GetFavoriteColorIcon(nameColorPair.mColor);
+                        isCurrentFavorite = nameColorPair.mColor.ARGB == mFavoriteColor.ARGB;
+                    }
+                    grid.AddItem(new ItemGridCellItem(window, favorite));
+                    if (isCurrentFavorite)
+                    {
+                        grid.SelectedItem = grid.Count - 1;
+                    }
+                }
+            }
+
             public new void RandomizeAllFavorites(bool missingFavoritesOnly)
             {
                 Random random = new Random();
@@ -537,7 +599,7 @@ namespace Destrospean.MoreFavorites
                             moodScore += peripheralStereoSpeaker.StandaloneMoodScore;
                         }
                         FavoritesUtils.FavoriteMusic favoriteMusic;
-                        if (mPlayingStationsData != null && (mPlayingStationsData.MusicType == sim.SimDescription.FavoriteMusic || FavoritesUtils.FavoriteMusicDictionary.TryGetValue(sim.SimDescription.FavoriteMusic, out favoriteMusic) && (favoriteMusic.Name == mPlayingStationsData.mStationName || Array.Exists(favoriteMusic.Children, x => x == mPlayingStationsData.mStationName))))
+                        if (mPlayingStationsData != null && (mPlayingStationsData.MusicType == sim.SimDescription.FavoriteMusic || FavoritesUtils.FavoriteMusicDictionary.TryGetValue(sim.SimDescription.FavoriteMusic, out favoriteMusic) && (favoriteMusic.Name == mPlayingStationsData.mStationName.Split(':')[1] || Array.Exists(favoriteMusic.Children, x => x == mPlayingStationsData.mStationName.Split(':')[1]))))
                         {
                             moodScore += BuffEnjoyingMusic.FavoriteMusicMoodScore;
                         }
@@ -569,6 +631,20 @@ namespace Destrospean.MoreFavorites
             }
         }
 
+        public void CreateDrinkList()
+        {
+            foreach (CASCharacter.NameColorPair nameColorPair in CASCharacter.kColors)
+            {
+                if (!nameColorPair.IsBlacklisted())
+                {
+                    FutureBar.DrinkData drinkDatum = default(FutureBar.DrinkData);
+                    drinkDatum.mDrinkName = nameColorPair.mName;
+                    drinkDatum.mDrinkColor = nameColorPair.mColor;
+                    ((FutureBar)(object)this).mDrinkData.Add(drinkDatum);
+                }
+            }
+        }
+
         public static string GetFavoriteFood(FavoriteFoodType foodType)
         {
             return foodType == FavoriteFoodType.None ? Responder.Instance.LocalizationModel.LocalizeString("Ui/Caption/CAS/Favorites:None") : Responder.Instance.LocalizationModel.LocalizeString("Gameplay/Excel/RecipeMasterList/Data:" + (foodType > FavoriteFoodType.Count ? FavoritesUtils.FavoriteFoodDictionary[foodType].Name : foodType.ToString()));
@@ -590,7 +666,7 @@ namespace Destrospean.MoreFavorites
 
         public static string GetFavoriteMusic(FavoriteMusicType musicType)
         {
-            return musicType == FavoriteMusicType.None ? Responder.Instance.LocalizationModel.LocalizeString("Ui/Caption/CAS/Favorites:None") : Responder.Instance.LocalizationModel.LocalizeString(musicType > FavoriteMusicType.Count ? FavoritesUtils.FavoriteMusicDictionary[musicType].Name : "Gameplay/Excel/Stereo/Stations:" + musicType);
+            return musicType == FavoriteMusicType.None ? Responder.Instance.LocalizationModel.LocalizeString("Ui/Caption/CAS/Favorites:None") : Responder.Instance.LocalizationModel.LocalizeString("Gameplay/Excel/Stereo/Stations:" + (musicType > FavoriteMusicType.Count ? FavoritesUtils.FavoriteMusicDictionary[musicType].Name : musicType.ToString()));
         }
 
         public static string GetFavoriteMusicPngName(FavoriteMusicType musicType)
@@ -682,9 +758,9 @@ namespace Destrospean.MoreFavorites
 
         public static IRecipe GetRecipe(FavoriteFoodType foodType)
         {
-            Sims3.Gameplay.Objects.FoodObjects.Recipe recipe;
+            Recipe recipe;
             FavoritesUtils.FavoriteFood favoriteFood;
-            return foodType > FavoriteFoodType.Count && FavoritesUtils.FavoriteFoodDictionary.TryGetValue(foodType, out favoriteFood) ? favoriteFood.Recipe : Sims3.Gameplay.Objects.FoodObjects.Recipe.NameToRecipeHash.TryGetValue(foodType.ToString(), out recipe) ? recipe: null;
+            return foodType > FavoriteFoodType.Count && FavoritesUtils.FavoriteFoodDictionary.TryGetValue(foodType, out favoriteFood) ? favoriteFood.Recipe : Recipe.NameToRecipeHash.TryGetValue(foodType.ToString(), out recipe) ? recipe: null;
         }
 
         public static string GetStationName(FavoriteMusicType musicType)
@@ -700,7 +776,7 @@ namespace Destrospean.MoreFavorites
             FavoritesUtils.FavoriteMusic favoriteMusic;
             if (FavoritesUtils.FavoriteMusicDictionary.TryGetValue(musicType, out favoriteMusic))
             {
-                stereoStationNames.Add(favoriteMusic.Name);
+                stereoStationNames.Add("Gameplay/Excel/Stereo/Stations:" + favoriteMusic.Name);
             }
             return stereoStationNames.Count == 0 ? null : RandomUtil.GetRandomObjectFromList(stereoStationNames);
         }
@@ -736,6 +812,80 @@ namespace Destrospean.MoreFavorites
             else
             {
                 sender.Tick -= self.OnFavoritesVisibilityTick;
+            }
+        }
+
+        public static void PopulateFavoritesGrid(ItemGrid grid, Array favoritesList, int startIndex, int endIndex, FavoriteFoodType favoriteFood, FavoriteMusicType favoriteMusic, Color favoriteColor, bool isVegetarian)
+        {
+            grid.Clear();
+            grid.ForceCellTooltips = true;
+            uint rowCount = (uint)Math.Ceiling((endIndex - startIndex) / (float)grid.VisibleColumns);
+            if (rowCount != grid.VisibleRows)
+            {
+                int emptyRowCount = (int)(rowCount - grid.VisibleRows);
+                grid.VisibleRows = rowCount;
+                float toAddToHeight = (float)emptyRowCount * (grid.CellArea.y + grid.CellPadding.Height);
+                Rect area = grid.Area;
+                area.Height += toAddToHeight;
+                grid.Area = area;
+                area = grid.Parent.Area;
+                area.Height += toAddToHeight;
+                grid.Parent.Area = area;
+            }
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                object favorite = favoritesList.GetValue(i);
+                Layout layout = UIManager.LoadLayout(ResourceKey.CreateUILayoutKey("FavoritesGridItem", 0));
+                Window window = (Window)layout.GetWindowByExportID(1);
+                ImageDrawable imageDrawable = (ImageDrawable)((Window)window.GetChildByID(32, false)).Drawable;
+                bool isCurrentFavorite = false;
+                if (favorite is FavoriteFoodType)
+                {
+                    FavoriteFoodType favoriteFoodType = (FavoriteFoodType)favorite;
+                    IRecipe recipe = Responder.Instance.CASModel.GetRecipe(favoriteFoodType);
+                    if (recipe != null)
+                    {
+                        if (!isVegetarian)
+                        {
+                            window.TooltipText = recipe.GenericName;
+                        }
+                        else
+                        {
+                            if (!recipe.IsVegetarian && !recipe.HasVegetarianAlternative)
+                            {
+                                continue;
+                            }
+                            window.TooltipText = recipe.GenericVegetarianName;
+                        }
+                        imageDrawable.Image = CASCharacter.GetFavoriteFoodIcon(favoriteFoodType);
+                        isCurrentFavorite = favoriteFoodType == favoriteFood;
+                    }
+                    else if (FavoritesUtils.FavoriteFoodDictionary.ContainsKey(favoriteFoodType))
+                    {
+                        window.TooltipText = Responder.Instance.LocalizationModel.LocalizeString("Gameplay/Excel/RecipeMasterList/Data:" + FavoritesUtils.FavoriteFoodDictionary[favoriteFoodType].Name);
+                        imageDrawable.Image = CASCharacter.GetFavoriteFoodIcon(favoriteFoodType);
+                        isCurrentFavorite = favoriteFoodType == favoriteFood;
+                    }
+                }
+                else if (favorite is FavoriteMusicType)
+                {
+                    FavoriteMusicType favoriteMusicType = (FavoriteMusicType)favorite;
+                    window.TooltipText = CASCharacter.GetFavoriteMusicName(favoriteMusicType);
+                    imageDrawable.Image = CASCharacter.GetFavoriteMusicIcon(favoriteMusicType);
+                    isCurrentFavorite = favoriteMusicType == favoriteMusic;
+                }
+                else if (favorite is CASCharacter.NameColorPair)
+                {
+                    CASCharacter.NameColorPair nameColorPair = (CASCharacter.NameColorPair)favorite;
+                    window.TooltipText = CASCharacter.GetLocalizedColorName(nameColorPair.mName);
+                    imageDrawable.Image = CASCharacter.GetFavoriteColorIcon(nameColorPair.mColor);
+                    isCurrentFavorite = nameColorPair.mColor.ARGB == favoriteColor.ARGB;
+                }
+                grid.AddItem(new ItemGridCellItem(window, favorite));
+                if (isCurrentFavorite)
+                {
+                    grid.SelectedItem = grid.Count - 1;
+                }
             }
         }
 
