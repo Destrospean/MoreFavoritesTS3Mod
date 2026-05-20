@@ -24,10 +24,11 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
                     List<PreferenceColor.Item> options = new List<PreferenceColor.Item>();
                     foreach (CASCharacter.NameColorPair nameColorPair in CASCharacter.kColors)
                     {
-                        if (Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs || !nameColorPair.IsBlacklisted())
+                        if (!Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && nameColorPair.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && nameColorPair.IsHidden())
                         {
-                            options.Add(new PreferenceColor.Item(nameColorPair.mColor, me.FavoriteColor == nameColorPair.mColor ? 1 : 0));
+                            continue;
                         }
+                        options.Add(new PreferenceColor.Item(nameColorPair.mColor, me.FavoriteColor == nameColorPair.mColor ? 1 : 0));
                     }
                     PreferenceColor.Item choice = new NRaas.CommonSpace.Selection.CommonSelection<PreferenceColor.Item>(Name, me.FullName, options).SelectSingle();
                     if (choice == null)
@@ -55,17 +56,22 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
                     List<PreferenceFood.Item> options = new List<PreferenceFood.Item>();
                     foreach (FavoriteFoodType foodType in System.Enum.GetValues(typeof(FavoriteFoodType)))
                     {
-                        if (0 < foodType && foodType < FavoriteFoodType.Count && (Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs || !foodType.IsBlacklisted()))
+                        if (0 < foodType && foodType < FavoriteFoodType.Count)
                         {
+                            if (!Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && foodType.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && foodType.IsHidden())
+                            {
+                                continue;
+                            }
                             options.Add(new PreferenceFood.Item(foodType, me.FavoriteFood == foodType ? 1 : 0));
                         }
                     }
                     foreach (FavoriteFoodType foodType in FavoritesUtils.FavoriteFoodDictionary.Keys)
                     {
-                        if (Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs || !foodType.IsBlacklisted())
+                        if (!Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && foodType.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && foodType.IsHidden())
                         {
-                            options.Add(new PreferenceFood.Item(foodType, me.FavoriteFood == foodType ? 1 : 0));
+                            continue;
                         }
+                        options.Add(new PreferenceFood.Item(foodType, me.FavoriteFood == foodType ? 1 : 0));
                     }
                     PreferenceFood.Item choice = new NRaas.CommonSpace.Selection.CommonSelection<PreferenceFood.Item>(Name, me.FullName, options).SelectSingle();
                     if (choice == null)
@@ -93,17 +99,22 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
                     List<PreferenceMusic.Item> options = new List<PreferenceMusic.Item>();
                     foreach (FavoriteMusicType musicType in System.Enum.GetValues(typeof(FavoriteMusicType)))
                     {
-                        if (0 < musicType && musicType < FavoriteMusicType.Count && (Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs || !musicType.IsBlacklisted()))
+                        if (0 < musicType && musicType < FavoriteMusicType.Count)
                         {
+                            if (!Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && musicType.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && musicType.IsHidden())
+                            {
+                                continue;
+                            }
                             options.Add(new PreferenceMusic.Item(musicType, me.FavoriteMusic == musicType ? 1 : 0));
                         }
                     }
                     foreach (FavoriteMusicType musicType in FavoritesUtils.FavoriteMusicDictionary.Keys)
                     {
-                        if (Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs || !musicType.IsBlacklisted())
+                        if (!Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && musicType.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && musicType.IsHidden())
                         {
-                            options.Add(new PreferenceMusic.Item(musicType, me.FavoriteMusic == musicType ? 1 : 0));
+                            continue;
                         }
+                        options.Add(new PreferenceMusic.Item(musicType, me.FavoriteMusic == musicType ? 1 : 0));
                     }
                     PreferenceMusic.Item choice = new NRaas.CommonSpace.Selection.CommonSelection<PreferenceMusic.Item>(Name, me.FullName, options).SelectSingle();
                     if (choice == null)

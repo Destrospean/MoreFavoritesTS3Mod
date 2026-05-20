@@ -41,20 +41,20 @@ namespace Destrospean.MoreFavorites
                     {
                         case 100663297:
                             {
-                                Array unblacklistedFavorites = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted());
-                                PopulateFavoritesGrid(mGridFavoriteFood, unblacklistedFavorites, 0, unblacklistedFavorites.Length);
+                                Array visibleFavorites = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted() && !x.IsHidden());
+                                PopulateFavoritesGrid(mGridFavoriteFood, visibleFavorites, 0, visibleFavorites.Length);
                                 break;
                             }
                         case 100663301:
                             {
-                                Array unblacklistedFavorites = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted());
-                                PopulateFavoritesGrid(mGridFavoriteMusic, unblacklistedFavorites, 0, unblacklistedFavorites.Length);
+                                Array visibleFavorites = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted() && !x.IsHidden());
+                                PopulateFavoritesGrid(mGridFavoriteMusic, visibleFavorites, 0, visibleFavorites.Length);
                                 break;
                             }
                         case 100663305:
                             {
-                                Array unblacklistedFavorites = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted());
-                                PopulateFavoritesGrid(mGridFavoriteColor, unblacklistedFavorites, 0, unblacklistedFavorites.Length);
+                                Array visibleFavorites = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted() && !x.IsHidden());
+                                PopulateFavoritesGrid(mGridFavoriteColor, visibleFavorites, 0, visibleFavorites.Length);
                                 break;
                             }
                     }
@@ -133,28 +133,28 @@ namespace Destrospean.MoreFavorites
                 FavoriteFoodType favoriteFood = mResult.mFavoriteFood;
                 if (!missingFavoritesOnly || favoriteFood == FavoriteFoodType.None)
                 {
-                    Array unblacklistedFavoriteFoodList = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted());
-                    favoriteFood = (FavoriteFoodType)unblacklistedFavoriteFoodList.GetValue(random.Next(1, unblacklistedFavoriteFoodList.Length));
+                    Array visibleFavoriteFoodList = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted() && !x.IsHidden());
+                    favoriteFood = (FavoriteFoodType)visibleFavoriteFoodList.GetValue(random.Next(1, visibleFavoriteFoodList.Length));
                     if (mSim.IsVegetarian)
                     {
                         IRecipe recipe = Responder.Instance.CASModel.GetRecipe(favoriteFood);
                         while (!recipe.IsVegetarian && !recipe.HasVegetarianAlternative)
                         {
-                            favoriteFood = (FavoriteFoodType)unblacklistedFavoriteFoodList.GetValue(random.Next(1, unblacklistedFavoriteFoodList.Length));
+                            favoriteFood = (FavoriteFoodType)visibleFavoriteFoodList.GetValue(random.Next(1, visibleFavoriteFoodList.Length));
                             recipe = Responder.Instance.CASModel.GetRecipe(favoriteFood);
                         }
                     }
                 }
                 FavoriteMusicType favoriteMusic = mResult.mFavoriteMusic;
-                Array blacklistedFavoriteMusicList = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted());
-                for (favoriteMusic = FavoriteMusicType.Custom; favoriteMusic == FavoriteMusicType.Custom; favoriteMusic = (FavoriteMusicType)blacklistedFavoriteMusicList.GetValue(random.Next(1, blacklistedFavoriteMusicList.Length)))
+                Array visibleFavoriteMusicList = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted() && !x.IsHidden());
+                for (favoriteMusic = FavoriteMusicType.Custom; favoriteMusic == FavoriteMusicType.Custom; favoriteMusic = (FavoriteMusicType)visibleFavoriteMusicList.GetValue(random.Next(1, visibleFavoriteMusicList.Length)))
                 {
                 }
                 Color favoriteColor = mResult.mFavoriteColor;
                 if (!missingFavoritesOnly || favoriteColor.ARGB == 0)
                 {
-                    Array unblacklistedFavoriteColorList = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted());
-                    favoriteColor = ((CASCharacter.NameColorPair)unblacklistedFavoriteColorList.GetValue(random.Next(0, unblacklistedFavoriteColorList.Length))).mColor;
+                    Array visibleFavoriteColorList = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted() && !x.IsHidden());
+                    favoriteColor = ((CASCharacter.NameColorPair)visibleFavoriteColorList.GetValue(random.Next(0, visibleFavoriteColorList.Length))).mColor;
                 }
                 mResult.mFavoriteFood = favoriteFood;
                 mResult.mFavoriteMusic = favoriteMusic;
@@ -216,7 +216,7 @@ namespace Destrospean.MoreFavorites
                 EatingPosture eatingPosture = GetPostureParam();
                 SetParameter("eatPosture", eatingPosture);
                 FavoritesUtils.FavoriteFood favoriteFood;
-                SetParameter("isFavorite", Actor.SimDescription.FavoriteFood != 0 && Target.Recipe != null && (Target.Recipe.Favorite == Actor.SimDescription.FavoriteFood || FavoritesUtils.FavoriteFoodDictionary.TryGetValue(Actor.SimDescription.FavoriteFood, out favoriteFood) && (favoriteFood.Name == Target.Recipe.Key || Array.Exists(favoriteFood.Children, x => x == Target.Recipe.Key))));
+                SetParameter("isFavorite", Actor.SimDescription.FavoriteFood != 0 && Target.Recipe != null && (Target.Recipe.Favorite == Actor.SimDescription.FavoriteFood || FavoritesUtils.FavoriteFoodDictionary.TryGetValue(Actor.SimDescription.FavoriteFood, out favoriteFood) && (favoriteFood.Name == Target.Recipe.Key || new List<FavoriteFoodType>(FavoritesUtils.FavoriteFoodDictionary.Keys).Exists(x => !x.IsBlacklisted() && FavoritesUtils.FavoriteFoodDictionary[x].Parent == favoriteFood.Name && FavoritesUtils.FavoriteFoodDictionary[x].Name == Target.Recipe.Key))));
                 SetParameter("isSloppy", Actor.HasTrait(TraitNames.Slob));
                 SetParameter("isSpoiled", Target.Spoiled);
                 SetParameter("isIceCream", Target is SnackIceCream);
@@ -599,7 +599,7 @@ namespace Destrospean.MoreFavorites
                             moodScore += peripheralStereoSpeaker.StandaloneMoodScore;
                         }
                         FavoritesUtils.FavoriteMusic favoriteMusic;
-                        if (mPlayingStationsData != null && (mPlayingStationsData.MusicType == sim.SimDescription.FavoriteMusic || FavoritesUtils.FavoriteMusicDictionary.TryGetValue(sim.SimDescription.FavoriteMusic, out favoriteMusic) && (favoriteMusic.Name == mPlayingStationsData.mStationName.Split(':')[1] || Array.Exists(favoriteMusic.Children, x => x == mPlayingStationsData.mStationName.Split(':')[1]))))
+                        if (mPlayingStationsData != null && (mPlayingStationsData.MusicType == sim.SimDescription.FavoriteMusic || FavoritesUtils.FavoriteMusicDictionary.TryGetValue(sim.SimDescription.FavoriteMusic, out favoriteMusic) && (favoriteMusic.Name == mPlayingStationsData.mStationName.Split(':')[1] || new List<FavoriteMusicType>(FavoritesUtils.FavoriteMusicDictionary.Keys).Exists(x => !x.IsBlacklisted() && FavoritesUtils.FavoriteMusicDictionary[x].Parent == favoriteMusic.Name && FavoritesUtils.FavoriteMusicDictionary[x].Name == mPlayingStationsData.mStationName.Split(':')[1]))))
                         {
                             moodScore += BuffEnjoyingMusic.FavoriteMusicMoodScore;
                         }
@@ -631,11 +631,31 @@ namespace Destrospean.MoreFavorites
             }
         }
 
+        public static void AddDrinkEffects(Sim actor, FutureBar target, string drinkName)
+        {
+            if (drinkName != "GrossJuice")
+            {
+                actor.BuffManager.AddElement(BuffNames.SugarRush, Origin.FromFutureBar);
+            }
+            if (drinkName == "GrossJuice")
+            {
+                actor.BuffManager.AddElement(BuffNames.OilyTaste, Origin.FromFutureBar);
+            }
+            else if (Array.Exists(FutureBar.kFavesAndOpposites, x => x.mFaveDrink == FutureBar.GetFavouriteDrinkName(actor, target).mDrinkName && (drinkName == x.mOppositeDrink || FavoritesUtils.FavoriteColorParentDictionary[drinkName] == x.mOppositeDrink)) || Array.Exists(FutureBar.kFavesAndOpposites, x => x.mOppositeDrink == FutureBar.GetFavouriteDrinkName(actor, target).mDrinkName && (drinkName == x.mFaveDrink || FavoritesUtils.FavoriteColorParentDictionary[drinkName] == x.mFaveDrink)))
+            {
+                actor.BuffManager.AddElement(BuffNames.ItIsRevolting, Origin.FromFutureBar);
+            }
+            else if (FutureBar.GetFavouriteDrinkName(actor, target).mDrinkName == drinkName || FutureBar.GetFavouriteDrinkName(actor, target).mDrinkName == FavoritesUtils.FavoriteColorParentDictionary[drinkName])
+            {
+                actor.BuffManager.AddElement(BuffNames.FavouriteDrink, Origin.FromFutureBar);
+            }
+        }
+
         public void CreateDrinkList()
         {
             foreach (CASCharacter.NameColorPair nameColorPair in CASCharacter.kColors)
             {
-                if (!nameColorPair.IsBlacklisted())
+                if (!nameColorPair.IsBlacklisted() && !nameColorPair.IsHidden())
                 {
                     FutureBar.DrinkData drinkDatum = default(FutureBar.DrinkData);
                     drinkDatum.mDrinkName = nameColorPair.mName;
@@ -753,7 +773,7 @@ namespace Destrospean.MoreFavorites
 
         public static UIImage GetMusicIcon(string imageFileName, FavoriteMusicType musicType)
         {
-            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(imageFileName, musicType > FavoriteMusicType.Count ? 0 : ResourceUtils.ProductVersionToGroupId(Responder.Instance.GetProductVersionForStereoStation(musicType))));
+            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(imageFileName, ResourceUtils.ProductVersionToGroupId(Responder.Instance.GetProductVersionForStereoStation(musicType))));
         }
 
         public static IRecipe GetRecipe(FavoriteFoodType foodType)
@@ -791,20 +811,20 @@ namespace Destrospean.MoreFavorites
                 {
                     case 100663297:
                         {
-                            Array unblacklistedFavorites = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted());
-                            self.PopulateFavoritesGrid(self.mGridFavoriteFood, unblacklistedFavorites, 0, unblacklistedFavorites.Length);
+                            Array visibleFavorites = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted() && !x.IsHidden());
+                            self.PopulateFavoritesGrid(self.mGridFavoriteFood, visibleFavorites, 0, visibleFavorites.Length);
                             break;
                         }
                     case 100663301:
                         {
-                            Array unblacklistedFavorites = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted());
-                            self.PopulateFavoritesGrid(self.mGridFavoriteMusic, unblacklistedFavorites, 0, unblacklistedFavorites.Length);
+                            Array visibleFavorites = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted() && !x.IsHidden());
+                            self.PopulateFavoritesGrid(self.mGridFavoriteMusic, visibleFavorites, 0, visibleFavorites.Length);
                             break;
                         }
                     case 100663305:
                         {
-                            Array unblacklistedFavorites = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted());
-                            self.PopulateFavoritesGrid(self.mGridFavoriteColor, unblacklistedFavorites, 0, unblacklistedFavorites.Length);
+                            Array visibleFavorites = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted() && !x.IsHidden());
+                            self.PopulateFavoritesGrid(self.mGridFavoriteColor, visibleFavorites, 0, visibleFavorites.Length);
                             break;
                         }
                 }
@@ -896,14 +916,14 @@ namespace Destrospean.MoreFavorites
             FavoriteFoodType favoriteFood = casModel.FavoriteFoodType;
             if (!missingFavoritesOnly || favoriteFood == FavoriteFoodType.None)
             {
-                Array unblacklistedFavorites = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted());
-                favoriteFood = (FavoriteFoodType)unblacklistedFavorites.GetValue(random.Next(1, unblacklistedFavorites.Length));
+                Array visibleFavorites = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted() && !x.IsHidden());
+                favoriteFood = (FavoriteFoodType)visibleFavorites.GetValue(random.Next(1, visibleFavorites.Length));
                 if (casModel.IsVegetarian())
                 {
                     IRecipe recipe = casModel.GetRecipe(favoriteFood);
                     while (!recipe.IsVegetarian && !recipe.HasVegetarianAlternative)
                     {
-                        favoriteFood = (FavoriteFoodType)unblacklistedFavorites.GetValue(random.Next(1, unblacklistedFavorites.Length));
+                        favoriteFood = (FavoriteFoodType)visibleFavorites.GetValue(random.Next(1, visibleFavorites.Length));
                         recipe = casModel.GetRecipe(favoriteFood);
                     }
                 }
@@ -911,16 +931,16 @@ namespace Destrospean.MoreFavorites
             FavoriteMusicType favoriteMusic = casModel.FavoriteMusicType;
             if (!missingFavoritesOnly || favoriteMusic == FavoriteMusicType.None)
             {
-                Array unblacklistedFavorites = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted());
-                for (favoriteMusic = FavoriteMusicType.Custom; favoriteMusic == FavoriteMusicType.Custom; favoriteMusic = (FavoriteMusicType)unblacklistedFavorites.GetValue(random.Next(1, unblacklistedFavorites.Length)))
+                Array visibleFavorites = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted() && !x.IsHidden());
+                for (favoriteMusic = FavoriteMusicType.Custom; favoriteMusic == FavoriteMusicType.Custom; favoriteMusic = (FavoriteMusicType)visibleFavorites.GetValue(random.Next(1, visibleFavorites.Length)))
                 {
                 }
             }
             Color favoriteColor = casModel.FavoriteColor;
             if (!missingFavoritesOnly || favoriteColor.ARGB == 0)
             {
-                Array unblacklistedFavorites = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted());
-                favoriteColor = ((CASCharacter.NameColorPair)unblacklistedFavorites.GetValue(random.Next(0, unblacklistedFavorites.Length))).mColor;
+                Array visibleFavorites = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted() && !x.IsHidden());
+                favoriteColor = ((CASCharacter.NameColorPair)visibleFavorites.GetValue(random.Next(0, visibleFavorites.Length))).mColor;
             }
             casModel.RequestRandomFavorites(favoriteFood, favoriteMusic, favoriteColor);
         }
@@ -928,11 +948,11 @@ namespace Destrospean.MoreFavorites
         public void RandomizeFavoriteMusic()
         {
             SimDescription self = (SimDescription)(object)this;
-            Array unblacklistedFavoriteMusicList = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted());
+            Array visibleFavoriteMusicList = Array.FindAll((FavoriteMusicType[])GetInstalledFavoriteMusicList(), x => !x.IsBlacklisted() && !x.IsHidden());
             self.mFavouriteMusicType = FavoriteMusicType.None;
             while (self.mFavouriteMusicType == FavoriteMusicType.Custom || self.mFavouriteMusicType == FavoriteMusicType.None)
             {
-                self.mFavouriteMusicType = (FavoriteMusicType)unblacklistedFavoriteMusicList.GetValue(RandomUtil.GetInt(1, unblacklistedFavoriteMusicList.Length - 1));
+                self.mFavouriteMusicType = (FavoriteMusicType)visibleFavoriteMusicList.GetValue(RandomUtil.GetInt(1, visibleFavoriteMusicList.Length - 1));
             }
         }
 
@@ -941,10 +961,10 @@ namespace Destrospean.MoreFavorites
             SimDescription self = (SimDescription)(object)this;
             self.mZodiacSign = (Zodiac)RandomUtil.GetInt(0, 11);
             self.RandomizeFavoriteMusic();
-            Array unblacklistedFavoriteFoodList = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted());
-            self.mFavouriteFoodType = (FavoriteFoodType)unblacklistedFavoriteFoodList.GetValue(RandomUtil.GetInt(1, unblacklistedFavoriteFoodList.Length - 1));
-            Array unblacklistedFavoriteColorList = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted());
-            self.mFavouriteColor = ((CASCharacter.NameColorPair)unblacklistedFavoriteColorList.GetValue(RandomUtil.GetInt(0, unblacklistedFavoriteColorList.Length - 1))).mColor;
+            Array visibleFavoriteFoodList = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted() && !x.IsHidden());
+            self.mFavouriteFoodType = (FavoriteFoodType)visibleFavoriteFoodList.GetValue(RandomUtil.GetInt(1, visibleFavoriteFoodList.Length - 1));
+            Array visibleFavoriteColorList = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted() && !x.IsHidden());
+            self.mFavouriteColor = ((CASCharacter.NameColorPair)visibleFavoriteColorList.GetValue(RandomUtil.GetInt(0, visibleFavoriteColorList.Length - 1))).mColor;
         }
     }
 }

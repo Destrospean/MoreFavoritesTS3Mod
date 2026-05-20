@@ -4,5 +4,8 @@
     {
         [Sims3.SimIFace.Tunable]
         public static bool kAllowBlacklistedFavoritesInMasterControllerDialogs;
+
+        [Sims3.SimIFace.Tunable]
+        public static bool kAllowHiddenFavoritesInMasterControllerDialogs;
     }
 }

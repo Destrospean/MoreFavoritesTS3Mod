@@ -32,6 +32,7 @@ namespace Destrospean.MoreFavorites
             ReplaceMethod(typeof(Sims3.UI.ChangeFavoritesDialog).GetMethod("PopulateFavoritesGrid", nonPublicInstance), typeof(Replacements.ChangeFavoritesDialogPatch).GetMethod("PopulateFavoritesGrid"));
             ReplaceMethod(typeof(Sims3.UI.ChangeFavoritesDialog).GetMethod("RandomizeAllFavorites", nonPublicInstance), typeof(Replacements.ChangeFavoritesDialogPatch).GetMethod("RandomizeAllFavorites"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.CookingObjects.EatHeldFood).GetMethod("Run", nonPublicInstance), typeof(Replacements.EatHeldFoodPatch).GetMethod("Run"));
+            ReplaceMethod(typeof(Sims3.Gameplay.Objects.Appliances.FutureBar).GetMethod("AddDrinkEffects"), typeof(Replacements).GetMethod("AddDrinkEffects"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.Appliances.FutureBar).GetMethod("CreateDrinkList"), typeof(Replacements).GetMethod("CreateDrinkList"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.Appliances.FutureBar.OrderDrinks).GetMethod("Run", nonPublicInstance), typeof(Replacements.OrderDrinksPatch).GetMethod("Run"));
             ReplaceMethod(typeof(Sims3.Gameplay.CAS.SimDescription).GetMethod("RandomizeFavoriteMusic", nonPublicInstance), typeof(Replacements).GetMethod("RandomizeFavoriteMusic"));
