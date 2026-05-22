@@ -433,7 +433,7 @@ namespace Destrospean.MoreFavorites
                         else if (reader.Name == "FavoriteFood" || reader.Name == "FavouriteFood")
                         {
                             string recipeKey = reader.GetAttribute("Recipe_Key");
-                            if (string.IsNullOrEmpty(recipeKey))
+                            if (string.IsNullOrEmpty(recipeKey) || Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), x => x == recipeKey))
                             {
                                 continue;
                             }
@@ -449,7 +449,7 @@ namespace Destrospean.MoreFavorites
                         else if (reader.Name == "FavoriteMusic" || reader.Name == "FavouriteMusic")
                         {
                             string stationName = reader.GetAttribute("Station_Name");
-                            if (string.IsNullOrEmpty(stationName))
+                            if (string.IsNullOrEmpty(stationName) || Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), x => x == stationName))
                             {
                                 continue;
                             }

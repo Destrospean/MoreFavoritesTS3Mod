@@ -105,7 +105,7 @@ namespace Destrospean.MoreFavorites_Generator
             assemblyName = "MoreFavorites_" + (string.IsNullOrEmpty(identifier) ? FNV32.GetHash(Guid.NewGuid().ToString()).ToString() : identifier);
 
             // Load the base package and create a new package to clone to
-            IPackage basePackage = s3pi.Package.Package.OpenPackage(0, "_MoreFavorites_Base.package"),
+            IPackage basePackage = s3pi.Package.Package.OpenPackage(0, AppDomain.CurrentDomain.BaseDirectory + "_MoreFavorites_Base.package"),
             newPackage = s3pi.Package.Package.NewPackage(0);
 
             // Get the assembly and XML
