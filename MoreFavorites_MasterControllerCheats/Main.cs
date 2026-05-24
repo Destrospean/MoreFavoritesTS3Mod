@@ -2,7 +2,9 @@
 using System.Reflection;
 using NRaas.MasterControllerSpace.SelectionCriteria;
 using NRaas.MasterControllerSpace.Sims.Intermediate.Favorites;
+using Sims3.Gameplay.CAS;
 using Sims3.Gameplay.UI;
+using Sims3.SimIFace;
 using Sims3.SimIFace.CAS;
 using Sims3.UI.CAS;
 using Tuning = Sims3.Gameplay.Destrospean.MoreFavorites.MasterControllerCheats;
@@ -11,12 +13,12 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
 {
     public class Main
     {
-        [Sims3.SimIFace.Tunable]
+        [Tunable]
         protected static bool kInstantiator;
 
         public class ChangeFavoriteColorPatch : ChangeFavoriteColor
         {
-            protected override bool Run(Sims3.Gameplay.CAS.SimDescription me, bool singleSelection)
+            protected override bool Run(SimDescription me, bool singleSelection)
             {
                 FieldInfo favoriteColorField = typeof(ChangeFavoriteColor).GetField("mFavoriteColor", BindingFlags.NonPublic | BindingFlags.Instance);
                 if (!ApplyAll)
@@ -37,7 +39,7 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
                     }
                     favoriteColorField.SetValue(this, choice.Value);
                 }
-                me.FavoriteColor = (Sims3.SimIFace.Color)favoriteColorField.GetValue(this);
+                me.FavoriteColor = (Color)favoriteColorField.GetValue(this);
                 if (Sims3.Gameplay.Core.PlumbBob.SelectedActor == me.CreatedSim)
                 {
                     ((HudModel)Responder.Instance.HudModel).OnSimFavoritesChanged(me.CreatedSim.ObjectId);
@@ -48,7 +50,7 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
 
         public class ChangeFavoriteFoodPatch : ChangeFavoriteFood
         {
-            protected override bool Run(Sims3.Gameplay.CAS.SimDescription me, bool singleSelection)
+            protected override bool Run(SimDescription me, bool singleSelection)
             {
                 FieldInfo favoriteFoodField = typeof(ChangeFavoriteFood).GetField("mFavoriteFood", BindingFlags.NonPublic | BindingFlags.Instance);
                 if (!ApplyAll)
@@ -91,7 +93,7 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
 
         public class ChangeFavoriteMusicPatch : ChangeFavoriteMusic
         {
-            protected override bool Run(Sims3.Gameplay.CAS.SimDescription me, bool singleSelection)
+            protected override bool Run(SimDescription me, bool singleSelection)
             {
                 FieldInfo favoriteMusicField = typeof(ChangeFavoriteMusic).GetField("mFavoriteMusic", BindingFlags.NonPublic | BindingFlags.Instance);
                 if (!ApplyAll)
@@ -132,12 +134,23 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
             }
         }
 
+        public class PreferenceMusicItemPatch : PreferenceMusic.Item
+        {
+            public override void SetValue(FavoriteMusicType value, FavoriteMusicType storeType)
+            {
+                mValue = value;
+                mName = CASCharacter.GetFavoriteMusic(value);
+                SetThumbnail(ResourceKey.CreatePNGKey(CASCharacter.GetFavoriteMusicPngName(value), FavoritesUtils.FavoriteMusicDictionary.ContainsKey(storeType) ? 0 : ResourceUtils.ProductVersionToGroupId(Responder.Instance.GetProductVersionForStereoStation(storeType))));
+            }
+        }
+
         static Main()
         {
             BindingFlags nonPublicInstance = BindingFlags.NonPublic | BindingFlags.Instance;
             MoreFavorites.Main.ReplaceMethod(typeof(ChangeFavoriteColor).GetMethod("Run", nonPublicInstance), typeof(ChangeFavoriteColorPatch).GetMethod("Run", nonPublicInstance));
             MoreFavorites.Main.ReplaceMethod(typeof(ChangeFavoriteFood).GetMethod("Run", nonPublicInstance), typeof(ChangeFavoriteFoodPatch).GetMethod("Run", nonPublicInstance));
             MoreFavorites.Main.ReplaceMethod(typeof(ChangeFavoriteMusic).GetMethod("Run", nonPublicInstance), typeof(ChangeFavoriteMusicPatch).GetMethod("Run", nonPublicInstance));
+            MoreFavorites.Main.ReplaceMethod(typeof(PreferenceMusic.Item).GetMethod("SetValue"), typeof(PreferenceMusicItemPatch).GetMethod("SetValue"));
         }
     }
 }

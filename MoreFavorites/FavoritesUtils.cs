@@ -403,11 +403,11 @@ namespace Destrospean.MoreFavorites
                         else if (reader.Name == "FavoriteFood" || reader.Name == "FavouriteFood")
                         {
                             string recipeKey = reader.GetAttribute("Recipe_Key");
-                            if (string.IsNullOrEmpty(recipeKey) || Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), x => x == recipeKey))
+                            if (string.IsNullOrEmpty(recipeKey))
                             {
                                 continue;
                             }
-                            FavoriteFoodType favoriteFoodType = (FavoriteFoodType)ResourceUtils.HashString32(recipeKey);
+                            FavoriteFoodType favoriteFoodType = Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), x => x == recipeKey) && Sims3.UI.Responder.Instance.CASModel.GetRecipe((FavoriteFoodType)Enum.Parse(typeof(FavoriteFoodType), recipeKey)) != null ? (FavoriteFoodType)Enum.Parse(typeof(FavoriteFoodType), recipeKey) : (FavoriteFoodType)ResourceUtils.HashString32(recipeKey);
                             Recipe recipe;
                             FavoriteFoodDictionary[favoriteFoodType] = new FavoriteFood(recipeKey, Recipe.NameToRecipeHash.TryGetValue(recipeKey, out recipe) ? recipe : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Parent"));
                             bool hidden;
@@ -419,11 +419,11 @@ namespace Destrospean.MoreFavorites
                         else if (reader.Name == "FavoriteMusic" || reader.Name == "FavouriteMusic")
                         {
                             string stationName = reader.GetAttribute("Station_Name");
-                            if (string.IsNullOrEmpty(stationName) || Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), x => x == stationName))
+                            if (string.IsNullOrEmpty(stationName))
                             {
                                 continue;
                             }
-                            FavoriteMusicType favoriteMusicType = (FavoriteMusicType)ResourceUtils.HashString32("Gameplay/Excel/Stereo/Stations:" + stationName);
+                            FavoriteMusicType favoriteMusicType = Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), x => x == stationName) && Sims3.UI.Responder.Instance.CASModel.IsMusicTypeInstalled((FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName)) ? (FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName) : (FavoriteMusicType)ResourceUtils.HashString32("Gameplay/Excel/Stereo/Stations:" + stationName);
                             StereoStationData stereoStationData;
                             FavoriteMusicDictionary[favoriteMusicType] = new FavoriteMusic(stationName, StereoStationData.sStereoStationDictionary.TryGetValue("Gameplay/Excel/Stereo/Stations:" + stationName, out stereoStationData) ? stereoStationData : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Parent"));
                             bool hidden;
