@@ -423,7 +423,7 @@ namespace Destrospean.MoreFavorites
                             {
                                 continue;
                             }
-                            FavoriteMusicType favoriteMusicType = Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), x => x == stationName) && Sims3.UI.Responder.Instance.CASModel.IsMusicTypeInstalled((FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName)) ? (FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName) : (FavoriteMusicType)ResourceUtils.HashString32("Gameplay/Excel/Stereo/Stations:" + stationName);
+                            FavoriteMusicType favoriteMusicType = Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), x => x == stationName) && IsMusicTypeInstalled((FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName)) ? (FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName) : (FavoriteMusicType)ResourceUtils.HashString32("Gameplay/Excel/Stereo/Stations:" + stationName);
                             StereoStationData stereoStationData;
                             FavoriteMusicDictionary[favoriteMusicType] = new FavoriteMusic(stationName, StereoStationData.sStereoStationDictionary.TryGetValue("Gameplay/Excel/Stereo/Stations:" + stationName, out stereoStationData) ? stereoStationData : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Parent"));
                             bool hidden;
@@ -494,6 +494,62 @@ namespace Destrospean.MoreFavorites
         public static bool IsHidden(this CASCharacter.NameColorPair nameColorPair)
         {
             return FavoriteColorBlacklist.Contains(nameColorPair.mName);
+        }
+
+        public static bool IsMusicTypeInstalled(FavoriteMusicType music)
+        {
+            bool result = true;
+            switch (music)
+            {
+                case FavoriteMusicType.None:
+                case FavoriteMusicType.Count:
+                    result = false;
+                    break;
+                case FavoriteMusicType.France:
+                case FavoriteMusicType.China:
+                case FavoriteMusicType.Egypt:
+                    result = GameUtils.IsInstalled(ProductVersion.EP1);
+                    break;
+                case FavoriteMusicType.Roots:
+                case FavoriteMusicType.Soul:
+                    result = GameUtils.IsInstalled(ProductVersion.EP2);
+                    break;
+                case FavoriteMusicType.Rockabilly:
+                    result = GameUtils.IsInstalled(ProductVersion.SP2);
+                    break;
+                case FavoriteMusicType.HipHop:
+                    result = GameUtils.IsInstalled(ProductVersion.EP3);
+                    break;
+                case FavoriteMusicType.Country:
+                case FavoriteMusicType.RnB:
+                case FavoriteMusicType.Songwriter:
+                    result = GameUtils.IsInstalled(ProductVersion.EP5);
+                    break;
+                case FavoriteMusicType.DarkWave:
+                    result = GameUtils.IsInstalled(ProductVersion.EP7);
+                    break;
+                case FavoriteMusicType.Disco:
+                case FavoriteMusicType.Rap:
+                case FavoriteMusicType.Rock:
+                    result = GameUtils.IsInstalled(ProductVersion.SP8);
+                    break;
+                case FavoriteMusicType.GeekRock:
+                    result = GameUtils.IsInstalled(ProductVersion.EP9);
+                    break;
+                case FavoriteMusicType.BeachParty:
+                case FavoriteMusicType.IslandLife:
+                    result = GameUtils.IsInstalled(ProductVersion.EP10);
+                    break;
+                case FavoriteMusicType.Horror:
+                case FavoriteMusicType.Epic:
+                case FavoriteMusicType.Spaghetti_Western:
+                    result = GameUtils.IsInstalled(ProductVersion.SP9);
+                    break;
+                case FavoriteMusicType.FutureWorld:
+                    result = GameUtils.IsInstalled(ProductVersion.EP11);
+                    break;
+            }
+            return result;
         }
     }
 }
