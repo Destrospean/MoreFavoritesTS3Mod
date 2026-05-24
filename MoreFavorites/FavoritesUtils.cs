@@ -407,8 +407,8 @@ namespace Destrospean.MoreFavorites
                             {
                                 continue;
                             }
-                            FavoriteFoodType favoriteFoodType = Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), x => x == recipeKey) && Sims3.UI.Responder.Instance.CASModel.GetRecipe((FavoriteFoodType)Enum.Parse(typeof(FavoriteFoodType), recipeKey)) != null ? (FavoriteFoodType)Enum.Parse(typeof(FavoriteFoodType), recipeKey) : (FavoriteFoodType)ResourceUtils.HashString32(recipeKey);
                             Recipe recipe;
+                            FavoriteFoodType favoriteFoodType = Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), x => x == recipeKey) && Recipe.NameToRecipeHash.TryGetValue(recipeKey, out recipe) && recipe != null ? (FavoriteFoodType)Enum.Parse(typeof(FavoriteFoodType), recipeKey) : (FavoriteFoodType)ResourceUtils.HashString32(recipeKey);
                             FavoriteFoodDictionary[favoriteFoodType] = new FavoriteFood(recipeKey, Recipe.NameToRecipeHash.TryGetValue(recipeKey, out recipe) ? recipe : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Parent"));
                             bool hidden;
                             if (bool.TryParse(reader.GetAttribute("Hidden"), out hidden) && hidden)
