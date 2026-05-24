@@ -15,15 +15,15 @@ namespace Destrospean.MoreFavorites
         FavoriteColorHiddenList = new List<string>(),
         OriginalFavoriteColors = new List<string>(Array.ConvertAll(CASCharacter.kColors, x => x.mName));
 
+        public static readonly Dictionary<string, string> FavoriteColorParentDictionary = new Dictionary<string, string>();
+
         public static readonly List<FavoriteFoodType> FavoriteFoodBlacklist = new List<FavoriteFoodType>(),
         FavoriteFoodHiddenList = new List<FavoriteFoodType>();
 
+        public static readonly Dictionary<FavoriteFoodType, FavoriteFood> FavoriteFoodDictionary = new Dictionary<FavoriteFoodType, FavoriteFood>();
+
         public static readonly List<FavoriteMusicType> FavoriteMusicBlacklist = new List<FavoriteMusicType>(),
         FavoriteMusicHiddenList = new List<FavoriteMusicType>();
-
-        public static readonly Dictionary<string, string> FavoriteColorParentDictionary = new Dictionary<string, string>();
-
-        public static readonly Dictionary<FavoriteFoodType, FavoriteFood> FavoriteFoodDictionary = new Dictionary<FavoriteFoodType, FavoriteFood>();
 
         public static readonly Dictionary<FavoriteMusicType, FavoriteMusic> FavoriteMusicDictionary = new Dictionary<FavoriteMusicType, FavoriteMusic>();
 
