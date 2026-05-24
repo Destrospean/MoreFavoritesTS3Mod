@@ -405,15 +405,15 @@ namespace Destrospean.MoreFavorites
                             string recipeKey = reader.GetAttribute("Recipe_Key");
                             Recipe recipe;
                             bool isGroup,
-                            isInstalled = Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), x => x == recipeKey) && Recipe.NameToRecipeHash.TryGetValue(recipeKey, out recipe) && recipe != null;
-                            if (string.IsNullOrEmpty(recipeKey) || !isInstalled && (!bool.TryParse(reader.GetAttribute("IsGroup"), out isGroup) || isGroup))
+                            isHidden,
+                            isValid = Recipe.NameToRecipeHash.TryGetValue(recipeKey, out recipe);
+                            if (string.IsNullOrEmpty(recipeKey) || !isValid && (!bool.TryParse(reader.GetAttribute("IsGroup"), out isGroup) || isGroup))
                             {
                                 continue;
                             }
-                            FavoriteFoodType favoriteFoodType = isInstalled ? (FavoriteFoodType)Enum.Parse(typeof(FavoriteFoodType), recipeKey) : (FavoriteFoodType)ResourceUtils.HashString32(recipeKey);
-                            FavoriteFoodDictionary[favoriteFoodType] = new FavoriteFood(recipeKey, Recipe.NameToRecipeHash.TryGetValue(recipeKey, out recipe) ? recipe : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Parent"));
-                            bool hidden;
-                            if (bool.TryParse(reader.GetAttribute("Hidden"), out hidden) && hidden)
+                            FavoriteFoodType favoriteFoodType = Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), x => x == recipeKey) && isValid && recipe != null ? (FavoriteFoodType)Enum.Parse(typeof(FavoriteFoodType), recipeKey) : (FavoriteFoodType)ResourceUtils.HashString32(recipeKey);
+                            FavoriteFoodDictionary[favoriteFoodType] = new FavoriteFood(recipeKey, isValid ? recipe : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Parent"));
+                            if (bool.TryParse(reader.GetAttribute("Hidden"), out isHidden) && isHidden)
                             {
                                 FavoriteFoodHiddenList.Add(favoriteFoodType);
                             }
@@ -421,17 +421,17 @@ namespace Destrospean.MoreFavorites
                         else if (reader.Name == "FavoriteMusic" || reader.Name == "FavouriteMusic")
                         {
                             string stationName = reader.GetAttribute("Station_Name");
+                            StereoStationData stereoStationData;
                             bool isGroup,
-                            isInstalled = Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), x => x == stationName) && IsMusicTypeInstalled((FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName));
-                            if (string.IsNullOrEmpty(stationName) || !isInstalled && (!bool.TryParse(reader.GetAttribute("IsGroup"), out isGroup) || isGroup))
+                            isHidden,
+                            isValid = StereoStationData.sStereoStationDictionary.TryGetValue("Gameplay/Excel/Stereo/Stations:" + stationName, out stereoStationData);
+                            if (string.IsNullOrEmpty(stationName) || !isValid && (!bool.TryParse(reader.GetAttribute("IsGroup"), out isGroup) || isGroup))
                             {
                                 continue;
                             }
-                            FavoriteMusicType favoriteMusicType = isInstalled ? (FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName) : (FavoriteMusicType)ResourceUtils.HashString32("Gameplay/Excel/Stereo/Stations:" + stationName);
-                            StereoStationData stereoStationData;
-                            FavoriteMusicDictionary[favoriteMusicType] = new FavoriteMusic(stationName, StereoStationData.sStereoStationDictionary.TryGetValue("Gameplay/Excel/Stereo/Stations:" + stationName, out stereoStationData) ? stereoStationData : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Parent"));
-                            bool hidden;
-                            if (bool.TryParse(reader.GetAttribute("Hidden"), out hidden) && hidden)
+                            FavoriteMusicType favoriteMusicType = Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), x => x == stationName) && IsMusicTypeInstalled((FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName)) ? (FavoriteMusicType)Enum.Parse(typeof(FavoriteMusicType), stationName) : (FavoriteMusicType)ResourceUtils.HashString32("Gameplay/Excel/Stereo/Stations:" + stationName);
+                            FavoriteMusicDictionary[favoriteMusicType] = new FavoriteMusic(stationName, isValid ? stereoStationData : null, reader.GetAttribute("Icon_Key"), reader.GetAttribute("Small_Icon_Key"), reader.GetAttribute("Parent"));
+                            if (bool.TryParse(reader.GetAttribute("Hidden"), out isHidden) && isHidden)
                             {
                                 FavoriteMusicHiddenList.Add(favoriteMusicType);
                             }
