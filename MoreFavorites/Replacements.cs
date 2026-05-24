@@ -676,12 +676,18 @@ namespace Destrospean.MoreFavorites
             {
                 foodType = FavoriteFoodType.Hamburger;
             }
-            return FavoritesUtils.FavoriteFoodDictionary.ContainsKey(foodType) ? string.IsNullOrEmpty(FavoritesUtils.FavoriteFoodDictionary[foodType].IconKey) ? "cas_favorites_food_i_hamburger_r2" : FavoritesUtils.FavoriteFoodDictionary[foodType].IconKey : "cas_favorites_food_i_" + foodType + "_r2";
+            FavoritesUtils.FavoriteFood favoriteFood;
+            return FavoritesUtils.FavoriteFoodDictionary.TryGetValue(foodType, out favoriteFood) ? string.IsNullOrEmpty(favoriteFood.IconKey) ? "cas_favorites_food_i_hamburger_r2" : favoriteFood.IconKey : "cas_favorites_food_i_" + foodType + "_r2";
         }
 
         public static UIImage GetFavoriteFoodSmallIcon(FavoriteFoodType foodType)
         {
-            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(FavoritesUtils.FavoriteFoodDictionary.ContainsKey(foodType) ? string.IsNullOrEmpty(FavoritesUtils.FavoriteFoodDictionary[foodType].SmallIconKey) ? "cas_favorites_food_i_hamburger_s_r2" : FavoritesUtils.FavoriteFoodDictionary[foodType].SmallIconKey : "cas_favorites_food_i_" + foodType + "_s_r2", 0));
+            if (foodType == FavoriteFoodType.None)
+            {
+                foodType = FavoriteFoodType.Hamburger;
+            }
+            FavoritesUtils.FavoriteFood favoriteFood;
+            return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(FavoritesUtils.FavoriteFoodDictionary.TryGetValue(foodType, out favoriteFood) ? string.IsNullOrEmpty(favoriteFood.SmallIconKey) ? "cas_favorites_food_i_hamburger_s_r2" : favoriteFood.SmallIconKey : "cas_favorites_food_i_" + foodType + "_s_r2", 0));
         }
 
         public static string GetFavoriteMusic(FavoriteMusicType musicType)
@@ -694,6 +700,11 @@ namespace Destrospean.MoreFavorites
             if (musicType == FavoriteMusicType.None)
             {
                 musicType = FavoriteMusicType.Electronica;
+            }
+            FavoritesUtils.FavoriteMusic favoriteMusic;
+            if (FavoritesUtils.FavoriteMusicDictionary.TryGetValue(musicType, out favoriteMusic))
+            {
+                return string.IsNullOrEmpty(favoriteMusic.IconKey) ? "cas_favorites_music_i_electronica_r2" : favoriteMusic.IconKey;
             }
             switch (musicType)
             {
@@ -712,13 +723,18 @@ namespace Destrospean.MoreFavorites
                 case FavoriteMusicType.Custom:
                     return "cas_favorites_music_i_" + musicType + "_r2";
                 default:
-                    return FavoritesUtils.FavoriteMusicDictionary.ContainsKey(musicType) ? string.IsNullOrEmpty(FavoritesUtils.FavoriteMusicDictionary[musicType].IconKey) ? "cas_favorites_music_i_electronica_r2" : FavoritesUtils.FavoriteMusicDictionary[musicType].IconKey : "cas_favs_music_i_" + musicType;
+                    return "cas_favs_music_i_" + musicType;
             }
         }
 
         public static UIImage GetFavoriteMusicSmallIcon(FavoriteMusicType musicType)
         {
             string imageFileName;
+            FavoritesUtils.FavoriteMusic favoriteMusic;
+            if (FavoritesUtils.FavoriteMusicDictionary.TryGetValue(musicType, out favoriteMusic))
+            {
+                imageFileName = string.IsNullOrEmpty(favoriteMusic.SmallIconKey) ? "cas_favorites_music_i_electronica_s_r2" : favoriteMusic.SmallIconKey;
+            }
             switch (musicType)
             {
                 case FavoriteMusicType.Electronica:
@@ -737,7 +753,7 @@ namespace Destrospean.MoreFavorites
                     imageFileName = "cas_favorites_music_i_" + musicType + "_s_r2";
                     break;
                 default:
-                    imageFileName = FavoritesUtils.FavoriteMusicDictionary.ContainsKey(musicType) ? string.IsNullOrEmpty(FavoritesUtils.FavoriteMusicDictionary[musicType].SmallIconKey) ? "cas_favorites_music_i_electronica_s_r2" : FavoritesUtils.FavoriteMusicDictionary[musicType].SmallIconKey : "cas_favs_music_i_" + musicType + "_s";
+                    imageFileName = "cas_favs_music_i_" + musicType + "_s";
                     break;
             }
             return GetMusicIcon(imageFileName, musicType);
