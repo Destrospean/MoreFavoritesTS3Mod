@@ -753,7 +753,7 @@ namespace Destrospean.MoreFavorites
                     favoriteFoodTypes.Add(foodType);
                 }
             }
-            favoriteFoodTypes.AddRange(new List<FavoriteFoodType>(FavoritesUtils.FavoriteFoodDictionary.Keys).FindAll(x => Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), y => y == FavoritesUtils.FavoriteFoodDictionary[x].Name)));
+            favoriteFoodTypes.AddRange(new List<FavoriteFoodType>(FavoritesUtils.FavoriteFoodDictionary.Keys).FindAll(x => !Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), y => y == FavoritesUtils.FavoriteFoodDictionary[x].Name)));
             return favoriteFoodTypes.ToArray();
         }
 
@@ -767,7 +767,7 @@ namespace Destrospean.MoreFavorites
                     favoriteMusicTypes.Add(musicType);
                 }
             }
-            favoriteMusicTypes.AddRange(new List<FavoriteMusicType>(FavoritesUtils.FavoriteMusicDictionary.Keys).FindAll(x => Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), y => y == FavoritesUtils.FavoriteMusicDictionary[x].Name)));
+            favoriteMusicTypes.AddRange(new List<FavoriteMusicType>(FavoritesUtils.FavoriteMusicDictionary.Keys).FindAll(x => !Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), y => y == FavoritesUtils.FavoriteMusicDictionary[x].Name)));
             return favoriteMusicTypes.ToArray();
         }
 
