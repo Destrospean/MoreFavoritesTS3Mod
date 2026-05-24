@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using NRaas.MasterControllerSpace.SelectionCriteria;
 using NRaas.MasterControllerSpace.Sims.Intermediate.Favorites;
@@ -56,7 +57,7 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
                 if (!ApplyAll)
                 {
                     List<PreferenceFood.Item> options = new List<PreferenceFood.Item>();
-                    foreach (FavoriteFoodType foodType in System.Enum.GetValues(typeof(FavoriteFoodType)))
+                    foreach (FavoriteFoodType foodType in Enum.GetValues(typeof(FavoriteFoodType)))
                     {
                         if (0 < foodType && foodType < FavoriteFoodType.Count)
                         {
@@ -69,7 +70,7 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
                     }
                     foreach (FavoriteFoodType foodType in FavoritesUtils.FavoriteFoodDictionary.Keys)
                     {
-                        if (!Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && foodType.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && foodType.IsHidden())
+                        if (Array.Exists(Enum.GetNames(typeof(FavoriteFoodType)), x => x == FavoritesUtils.FavoriteFoodDictionary[foodType].Name) || !Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && foodType.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && foodType.IsHidden())
                         {
                             continue;
                         }
@@ -99,7 +100,7 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
                 if (!ApplyAll)
                 {
                     List<PreferenceMusic.Item> options = new List<PreferenceMusic.Item>();
-                    foreach (FavoriteMusicType musicType in System.Enum.GetValues(typeof(FavoriteMusicType)))
+                    foreach (FavoriteMusicType musicType in Enum.GetValues(typeof(FavoriteMusicType)))
                     {
                         if (0 < musicType && musicType < FavoriteMusicType.Count)
                         {
@@ -112,7 +113,7 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
                     }
                     foreach (FavoriteMusicType musicType in FavoritesUtils.FavoriteMusicDictionary.Keys)
                     {
-                        if (!Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && musicType.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && musicType.IsHidden())
+                        if (Array.Exists(Enum.GetNames(typeof(FavoriteMusicType)), x => x == FavoritesUtils.FavoriteMusicDictionary[musicType].Name) || !Tuning.kAllowBlacklistedFavoritesInMasterControllerDialogs && musicType.IsBlacklisted() || !Tuning.kAllowHiddenFavoritesInMasterControllerDialogs && musicType.IsHidden())
                         {
                             continue;
                         }
