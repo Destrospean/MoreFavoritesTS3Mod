@@ -348,36 +348,6 @@ namespace Destrospean.MoreFavorites
             return Math.Sqrt(Math.Pow(a.Red - b.Red, 2) + Math.Pow(a.Green - b.Green, 2) + Math.Pow(a.Blue - b.Blue, 2));
         }
 
-        public static bool IsBlacklisted(this FavoriteFoodType foodType)
-        {
-            return FavoriteFoodBlacklist.Contains(foodType);
-        }
-
-        public static bool IsBlacklisted(this FavoriteMusicType musicType)
-        {
-            return FavoriteMusicBlacklist.Contains(musicType);
-        }
-
-        public static bool IsBlacklisted(this CASCharacter.NameColorPair nameColorPair)
-        {
-            return FavoriteColorBlacklist.Contains(nameColorPair.mName);
-        }
-
-        public static bool IsHidden(this CASCharacter.NameColorPair nameColorPair)
-        {
-            return FavoriteColorBlacklist.Contains(nameColorPair.mName);
-        }
-
-        public static bool IsHidden(this FavoriteFoodType foodType)
-        {
-            return FavoriteFoodBlacklist.Contains(foodType);
-        }
-
-        public static bool IsHidden(this FavoriteMusicType musicType)
-        {
-            return FavoriteMusicBlacklist.Contains(musicType);
-        }
-
         public static void InitFavorites()
         {
             List<CASCharacter.NameColorPair> favoriteColorList = new List<CASCharacter.NameColorPair>(CASCharacter.kColors);
@@ -494,6 +464,36 @@ namespace Destrospean.MoreFavorites
             }
             CASCharacter.kColors = favoriteColorList.ToArray();
             FutureBar.kFavesAndOpposites = favoriteAndOppositeDrinkList.ToArray();
+        }
+
+        public static bool IsBlacklisted(this FavoriteFoodType foodType)
+        {
+            return FavoriteFoodBlacklist.Contains(foodType);
+        }
+
+        public static bool IsBlacklisted(this FavoriteMusicType musicType)
+        {
+            return FavoriteMusicBlacklist.Contains(musicType);
+        }
+
+        public static bool IsBlacklisted(this CASCharacter.NameColorPair nameColorPair)
+        {
+            return FavoriteColorBlacklist.Contains(nameColorPair.mName);
+        }
+
+        public static bool IsHidden(this FavoriteFoodType foodType)
+        {
+            return FavoriteFoodBlacklist.Contains(foodType);
+        }
+
+        public static bool IsHidden(this FavoriteMusicType musicType)
+        {
+            return FavoriteMusicBlacklist.Contains(musicType);
+        }
+
+        public static bool IsHidden(this CASCharacter.NameColorPair nameColorPair)
+        {
+            return FavoriteColorBlacklist.Contains(nameColorPair.mName);
         }
     }
 }
