@@ -487,17 +487,17 @@ namespace Destrospean.MoreFavorites
 
         public static bool IsHidden(this FavoriteFoodType foodType)
         {
-            return FavoriteFoodBlacklist.Contains(foodType);
+            return FavoriteFoodHiddenList.Contains(foodType);
         }
 
         public static bool IsHidden(this FavoriteMusicType musicType)
         {
-            return FavoriteMusicBlacklist.Contains(musicType);
+            return FavoriteMusicHiddenList.Contains(musicType);
         }
 
         public static bool IsHidden(this CASCharacter.NameColorPair nameColorPair)
         {
-            return FavoriteColorBlacklist.Contains(nameColorPair.mName);
+            return FavoriteColorHiddenList.Contains(nameColorPair.mName);
         }
 
         public static bool IsMusicTypeInstalled(FavoriteMusicType music)
