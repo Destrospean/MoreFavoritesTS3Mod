@@ -69,7 +69,7 @@ namespace Destrospean.MoreFavorites
             {
                 grid.Clear();
                 grid.ForceCellTooltips = true;
-                Color mFavoriteColor = mResult.mFavoriteColor;
+                Color favoriteColor = mResult.mFavoriteColor;
                 for (int i = startIndex; i < endIndex; i++)
                 {
                     object favorite = favoritesList.GetValue(i);
@@ -117,7 +117,7 @@ namespace Destrospean.MoreFavorites
                         CASCharacter.NameColorPair nameColorPair = (CASCharacter.NameColorPair)favorite;
                         window.TooltipText = CASCharacter.GetLocalizedColorName(nameColorPair.mName);
                         imageDrawable.Image = CASCharacter.GetFavoriteColorIcon(nameColorPair.mColor);
-                        isCurrentFavorite = nameColorPair.mColor.ARGB == mFavoriteColor.ARGB;
+                        isCurrentFavorite = nameColorPair.mColor.ARGB == favoriteColor.ARGB;
                     }
                     grid.AddItem(new ItemGridCellItem(window, favorite));
                     if (isCurrentFavorite)
@@ -855,6 +855,7 @@ namespace Destrospean.MoreFavorites
         {
             grid.Clear();
             grid.ForceCellTooltips = true;
+            /*
             uint rowCount = (uint)Math.Ceiling((endIndex - startIndex) / (float)grid.VisibleColumns);
             if (rowCount != grid.VisibleRows)
             {
@@ -868,6 +869,7 @@ namespace Destrospean.MoreFavorites
                 area.Height += toAddToHeight;
                 grid.Parent.Area = area;
             }
+            */
             for (int i = startIndex; i < endIndex; i++)
             {
                 object favorite = favoritesList.GetValue(i);
