@@ -682,10 +682,6 @@ namespace Destrospean.MoreFavorites
 
         public static UIImage GetFavoriteFoodSmallIcon(FavoriteFoodType foodType)
         {
-            if (foodType == FavoriteFoodType.None)
-            {
-                foodType = FavoriteFoodType.Hamburger;
-            }
             FavoritesUtils.FavoriteFood favoriteFood;
             return UIManager.LoadUIImage(ResourceKey.CreatePNGKey(FavoritesUtils.FavoriteFoodDictionary.TryGetValue(foodType, out favoriteFood) ? string.IsNullOrEmpty(favoriteFood.SmallIconKey) ? "cas_favorites_food_i_hamburger_s_r2" : favoriteFood.SmallIconKey : "cas_favorites_food_i_" + foodType + "_s_r2", 0));
         }
@@ -722,18 +718,16 @@ namespace Destrospean.MoreFavorites
                 case FavoriteMusicType.Rockabilly:
                 case FavoriteMusicType.Custom:
                     return "cas_favorites_music_i_" + musicType + "_r2";
-                default:
-                    return "cas_favs_music_i_" + musicType;
             }
+            return "cas_favs_music_i_" + musicType;
         }
 
         public static UIImage GetFavoriteMusicSmallIcon(FavoriteMusicType musicType)
         {
-            string imageFileName;
             FavoritesUtils.FavoriteMusic favoriteMusic;
             if (FavoritesUtils.FavoriteMusicDictionary.TryGetValue(musicType, out favoriteMusic))
             {
-                imageFileName = string.IsNullOrEmpty(favoriteMusic.SmallIconKey) ? "cas_favorites_music_i_electronica_s_r2" : favoriteMusic.SmallIconKey;
+                return GetMusicIcon(string.IsNullOrEmpty(favoriteMusic.SmallIconKey) ? "cas_favorites_music_i_electronica_s_r2" : favoriteMusic.SmallIconKey, musicType);
             }
             switch (musicType)
             {
@@ -750,13 +744,9 @@ namespace Destrospean.MoreFavorites
                 case FavoriteMusicType.Soul:
                 case FavoriteMusicType.Rockabilly:
                 case FavoriteMusicType.Custom:
-                    imageFileName = "cas_favorites_music_i_" + musicType + "_s_r2";
-                    break;
-                default:
-                    imageFileName = "cas_favs_music_i_" + musicType + "_s";
-                    break;
+                    return GetMusicIcon("cas_favorites_music_i_" + musicType + "_s_r2", musicType);
             }
-            return GetMusicIcon(imageFileName, musicType);
+            return GetMusicIcon("cas_favs_music_i_" + musicType + "_s", musicType);
         }
 
         public static Array GetInstalledFavoriteFoodList()
@@ -977,12 +967,12 @@ namespace Destrospean.MoreFavorites
         public void RandomizePreferences()
         {
             SimDescription self = (SimDescription)(object)this;
-            self.mZodiacSign = (Zodiac)RandomUtil.GetInt(0, 11);
-            self.RandomizeFavoriteMusic();
-            Array visibleFavoriteFoodList = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted() && !x.IsHidden());
-            self.mFavouriteFoodType = (FavoriteFoodType)visibleFavoriteFoodList.GetValue(RandomUtil.GetInt(1, visibleFavoriteFoodList.Length - 1));
-            Array visibleFavoriteColorList = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted() && !x.IsHidden());
+            Array visibleFavoriteColorList = Array.FindAll(CASCharacter.kColors, x => !x.IsBlacklisted() && !x.IsHidden()),
+            visibleFavoriteFoodList = Array.FindAll((FavoriteFoodType[])GetInstalledFavoriteFoodList(), x => !x.IsBlacklisted() && !x.IsHidden());
             self.mFavouriteColor = ((CASCharacter.NameColorPair)visibleFavoriteColorList.GetValue(RandomUtil.GetInt(0, visibleFavoriteColorList.Length - 1))).mColor;
+            self.mFavouriteFoodType = (FavoriteFoodType)visibleFavoriteFoodList.GetValue(RandomUtil.GetInt(1, visibleFavoriteFoodList.Length - 1));
+            self.RandomizeFavoriteMusic();
+            self.mZodiacSign = (Zodiac)RandomUtil.GetInt(0, 11);
         }
     }
 }
