@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Sims3.Gameplay;
 using Sims3.Gameplay.Abstracts;
 using Sims3.Gameplay.Actors;
@@ -15,7 +16,9 @@ using Sims3.Gameplay.Objects.CookingObjects;
 using Sims3.Gameplay.Objects.Counters;
 using Sims3.Gameplay.Objects.Electronics;
 using Sims3.Gameplay.Objects.FoodObjects;
+using Sims3.Gameplay.Objects.Resort;
 using Sims3.Gameplay.Objects.Seating;
+using Sims3.Gameplay.Utilities;
 using Sims3.SimIFace;
 using Sims3.SimIFace.CAS;
 using Sims3.SimIFace.Enums;
@@ -338,7 +341,7 @@ namespace Destrospean.MoreFavorites
                             {
                                 Actor.LoopIdle();
                                 Actor.RegisterGroupTalk();
-                                mTimeWaitForOtherStarted = Sims3.Gameplay.Utilities.SimClock.CurrentTime();
+                                mTimeWaitForOtherStarted = SimClock.CurrentTime();
                                 Actor.RemoveExitReason(ExitReason.Finished);
                                 Actor.TryGroupTalk();
                                 DoLoop(ExitReason.Default, WaitForOthersLoopCallback, null, 5);
@@ -357,9 +360,9 @@ namespace Destrospean.MoreFavorites
                             }
                         }
                         ISingleServingContainer singleServingContainer = Target as ISingleServingContainer;
-                        if (singleServingContainer != null && singleServingContainer.FromResortBuffetTable && !Actor.BuffManager.HasElement(BuffNames.Stuffed) && Actor.Motives.GetMotiveValue(CommodityKind.Hunger) <= (float)Sims3.Gameplay.Objects.Resort.ResortBuffetTable.kHungerToStopFeeding)
+                        if (singleServingContainer != null && singleServingContainer.FromResortBuffetTable && !Actor.BuffManager.HasElement(BuffNames.Stuffed) && Actor.Motives.GetMotiveValue(CommodityKind.Hunger) <= (float)ResortBuffetTable.kHungerToStopFeeding)
                         {
-                            Sims3.Gameplay.Objects.Resort.ResortBuffetTable.ConsumeMoreFood(Actor);
+                            ResortBuffetTable.ConsumeMoreFood(Actor);
                         }
                     }
                     else
@@ -421,6 +424,306 @@ namespace Destrospean.MoreFavorites
                     Actor.InteractionQueue.PushAsContinuation(FinishEatingOutside.Singleton, Target, true);
                 }
                 Actor.BuffManager.RemoveElement(BuffNames.MintyBreath);
+                StandardExit(addToUseList, addToUseList);
+                return succeeded;
+            }
+
+            public bool RunIcarusAllSortsOverride()
+            {
+                if (Actor.Posture != null && !Actor.Posture.Satisfies(CommodityKind.Sitting, null))
+                {
+                    Actor.Wander(ServingContainerGroup.kMinDistanceToMoveAwayAfterGrabbingPlate, ServingContainerGroup.kMaxDistanceToMoveAwayAfterGrabbingPlate, true, RouteDistancePreference.NoPreference, true);
+                }
+                PreparedFood preparedFood = (PreparedFood)Target;
+                CookingProcess cookingProcess = preparedFood.CookingProcess;
+                List<CookedIngredient> chosenIngredients = cookingProcess.ChosenIngredients;
+                if (Actor.HasTrait(TraitNames.Vegetarian) && !cookingProcess.Recipe.IsVegetarian && (!cookingProcess.Recipe.HasVegetarianAlternative || !cookingProcess.StartedByVegetarian))
+                {
+                    Actor.PlayReaction(ReactionTypes.Retch, preparedFood, ReactionSpeed.ImmediateWithoutOverlay);
+                }
+                if (!InteractionTest(Actor, Target))
+                {
+                    if (Target.Parent == Actor)
+                    {
+                        Actor.InteractionQueue.PushAsContinuation(CarrySystem.PutDownHeldObject.Singleton, Target, false, Actor.InheritedPriority(), true);
+                    }
+                    return false;
+                }
+                bool addToUseList = Target.Parent != Actor;
+                if (Autonomous)
+                {
+                    mPriority = new InteractionPriority(InteractionPriorityLevel.UserDirected);
+                }
+                StandardEntry(addToUseList);
+                ChairDining chairDining = Actor.Posture.Container as ChairDining;
+                if (chairDining != null && chairDining.Parent != null && chairDining.ChairState == ChairDining.State.Angled && addToUseList)
+                {
+                    InteractionInstance interactionInstance = SitTransitionAngledToStraight.Singleton.CreateInstance(chairDining, Actor, GetPriority(), false, false);
+                    interactionInstance.RunInteraction();
+                }
+                Food.PreEat(Actor, preparedFood, ref mIsSufficientlyFullForStuffed, ref mHasFatDelta);
+                mCurrentStateMachine = StateMachineClient.Acquire(Actor, "eat", AnimationPriority.kAPCarryRightPlus);
+                SetActor("x", Actor);
+                SetParameter("isWerewolf", chairDining != null && Actor.BuffManager.HasElement(BuffNames.Werewolf));
+                SetActor("ServingContainer", Target);
+                SetActor("thingToEat", Target.ThingToEat);
+                Counter counter = Target.Parent as Counter;
+                if (counter != null)
+                {
+                    SetActor("Counter", counter);
+                    SetParameter("IKSuffix", counter.IkSuffix);
+                }
+                mCurrentStateMachine.EnterState("x", "Enter");
+                if (Actor.Posture != null && Actor.Posture.Satisfies(CommodityKind.Sitting, Target))
+                {
+                    SetActor("sitTemplate", Actor.Posture.Container);
+                    SetParameter("sitTemplateSuffix", ((SittingPosture)Actor.Posture).Part.Target.IKSuffix);
+                }
+                bool isSloppy = Actor.HasTrait(TraitNames.Slob);
+                EatingPosture eatingPosture = GetPostureParam();
+                SetParameter("eatPosture", eatingPosture);
+                FavoritesUtils.FavoriteFood favoriteFood;
+                SetParameter("isFavorite", Actor.SimDescription.FavoriteFood != 0 && cookingProcess.Recipe != null && (cookingProcess.Recipe.Favorite == Actor.SimDescription.FavoriteFood || FavoritesUtils.FavoriteFoodDictionary.TryGetValue(Actor.SimDescription.FavoriteFood, out favoriteFood) && (favoriteFood.Name == cookingProcess.Recipe.Key || new List<FavoriteFoodType>(FavoritesUtils.FavoriteFoodDictionary.Keys).Exists(x => !x.IsBlacklisted() && FavoritesUtils.FavoriteFoodDictionary[x].Parent == favoriteFood.Name && FavoritesUtils.FavoriteFoodDictionary[x].Name == cookingProcess.Recipe.Key))));
+                SetParameter("isSloppy", isSloppy);
+                SetParameter("isSpoiled", cookingProcess.IsSpoiled);
+                SetParameter("isIceCream", Target is SnackIceCream);
+                UtensilType utensilType = cookingProcess.Recipe.Utensil == "chopsticks" || Target.UtensilName == "fork" && !cookingProcess.Recipe.IsDessert && (Actor.TraitManager.HasAnyElement(TraitNames.CultureChina, (TraitNames)15572421960754265911uL) || GameUtils.GetCurrentWorld() == WorldName.China) ? UtensilType.chopsticks : Target.UtensilType;
+                SetParameter("UtensilType", utensilType);
+                if (!Target.IsDrinkable)
+                {
+                    switch (eatingPosture)
+                    {
+                        case EatingPosture.diningIn:
+                            if (utensilType == UtensilType.fork || utensilType == UtensilType.hand)
+                            {
+                                mAllowsThrowScrap = true;
+                            }
+                            break;
+                        case EatingPosture.diningOut:
+                            if (utensilType == UtensilType.fork)
+                            {
+                                mAllowsThrowScrap = true;
+                            }
+                            break;
+                    }
+                    mPetWatchSimEatingHelper.Watchable = true;
+                    mPetWatchSimEatingHelper.TriggerReactionBroadcaster(Actor);
+                }
+                mPropHandle = ObjectGuid.InvalidObjectGuid;
+                if (utensilType != UtensilType.hand)
+                {
+                    mPropHandle = GlobalFunctions.CreateProp((utensilType == UtensilType.chopsticks) ? "UtensilChopsticks" : GetUtensilMedatorName(Target.UtensilName), Vector3.OutOfWorld, 0, Vector3.UnitZ);
+                    if (mPropHandle != ObjectGuid.InvalidObjectGuid)
+                    {
+                        mCurrentStateMachine.SetPropActor("utensil", mPropHandle);
+                    }
+                }
+                mCurrentStateMachine.AddOneShotScriptEventHandler(101, new ObjectHideHelper(Target).Callback);
+                mCurrentStateMachine.AddOneShotScriptEventHandler(105, (SacsEventHandler)ParentFoodToContainer);
+                mCurrentStateMachine.AddPersistentScriptEventHandler(501, (SacsEventHandler)StartSloppyVFX);
+                mCurrentStateMachine.AddPersistentScriptEventHandler(502, (SacsEventHandler)StopSloppyVFX);
+                if (eatingPosture == EatingPosture.living)
+                {
+                    Seat.EnsureLivingChairPosture(Actor);
+                }
+                AnimateSim(Target.EatLoopStateName);
+                SetParameter("wasInterrupted", true);
+                FieldInfo commodityToChangeField = GetType().GetField("mCommodityToChange"),
+                hungerPerBiteOrSipField = GetType().GetField("mHungerPerBiteOrSip"),
+                hungerValueThresholdField = GetType().GetField("mHungerValueThreshold");
+                if (Actor.Motives.HasMotive(CommodityKind.VampireThirst) && cookingProcess.IsVampireFood)
+                {
+                    commodityToChangeField.SetValue(this, CommodityKind.VampireThirst);
+                }
+                AddMotiveArrow((CommodityKind)commodityToChangeField.GetValue(this), true);
+                BeginCommodityUpdates();
+                ReactionBroadcaster reactionBroadcaster = null;
+                if (cookingProcess.Recipe.Key == "BrainFreeze")
+                {
+                    AddMotiveDelta(CommodityKind.BeAZombie, BuffZombieFreeze.kZombieCommodityChangeRate);
+                    reactionBroadcaster = new ReactionBroadcaster((IGameObject)Actor, BuffZombieFreeze.kBrainFreezeCreepedOutBroadcasterParams, (ReactionBroadcaster.BroadcastCallback)OnEnterCreepedOut);
+                }
+                Actor.RegisterGroupTalk();
+                OccultImaginaryFriend.GrantMilestoneBuff(Actor, BuffNames.ImaginaryFriendAteFood, Origin.FromImaginaryFriendFirstTime, false, true, false);
+                if (Target.IsDrinkable)
+                {
+                    hungerPerBiteOrSipField.SetValue(this, kHungerValuePerSipForJuice);
+                    hungerValueThresholdField.SetValue(this, Target is SnackVampireJuice && (CommodityKind)commodityToChangeField.GetValue(this) == CommodityKind.VampireThirst ? kHungerValueForMeal : kHungerValueForJuice);
+                }
+                else if (cookingProcess.Recipe.IsSnack)
+                {
+                    hungerPerBiteOrSipField.SetValue(this, kHungerValuePerBiteForSnack);
+                    hungerValueThresholdField.SetValue(this, kHungerValueForSnack);
+                }
+                else
+                {
+                    hungerPerBiteOrSipField.SetValue(this, kHungerValuePerBiteForMeal);
+                    hungerValueThresholdField.SetValue(this, kHungerValueForMeal);
+                }
+                float hungerMultiplier = 1;
+                if (Actor.SimDescription.IsMermaid && !cookingProcess.IsMermaidFood)
+                {
+                    hungerMultiplier = MathUtils.Clamp((float)GetType().GetMethod("CountFishInFood").Invoke(this, new object[]
+                        {
+                            chosenIngredients,
+                            cookingProcess.Recipe
+                        }) * ((bool)GetType().GetField("kHungerGivenIsPerFish", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) ? ((float)GetType().GetField("kHungerPerFish", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) / MathUtils.Clamp((float)Food.FoodUnitsFullServing * kHungerValuePerBiteForMeal, 1, kHungerValueForMeal)) : 1), OccultMermaid.kHungerValueMultiplier, 1);
+                }
+                if (Actor.SimDescription.IsFrankenstein)
+                {
+                    hungerMultiplier *= kHungerValueMultiplierFrankenstein;
+                }
+                hungerPerBiteOrSipField.SetValue(this, (float)hungerPerBiteOrSipField.GetValue(this) * hungerMultiplier);
+                hungerValueThresholdField.SetValue(this, (float)hungerValueThresholdField.GetValue(this) * hungerMultiplier);
+                bool isFlaming = (bool)GetType().GetMethod("IsFlaming").Invoke(null, new object[]
+                    {
+                        preparedFood,
+                        false
+                    });
+                GetType().GetField("mGivePyroBenefits").SetValue(this, isFlaming && !cookingProcess.IsSpoiled && Actor.HasTrait(TraitNames.Pyromaniac));
+                bool succeeded = DoLoop(ExitReason.Default, LoopCallback, mCurrentStateMachine);
+                Actor.UnregisterGroupTalk();
+                EndCommodityUpdates(succeeded);
+                RemoveMotiveDelta(CommodityKind.BeAZombie);
+                if (reactionBroadcaster != null)
+                {
+                    reactionBroadcaster.EndBroadcast();
+                    reactionBroadcaster.Dispose();
+                }
+                SetParameter("wasInterrupted", !Actor.HasExitReason(ExitReason.Finished));
+                mCurrentStateMachine.RemoveEventHandler((SacsEventHandler)StartSloppyVFX);
+                mCurrentStateMachine.RemoveEventHandler((SacsEventHandler)StopSloppyVFX);
+                AnimateSim("Exit");
+                mPetWatchSimEatingHelper.Watchable = false;
+                if (mPropHandle != ObjectGuid.InvalidObjectGuid)
+                {
+                    Simulator.DestroyObject(mPropHandle);
+                }
+                bool pushAsContinuation = false;
+                if (Actor.HasExitReason())
+                {
+                    Actor.RemoveExitReason(ExitReason.MoodFailure);
+                    if (Actor.OnlyHasExitReason(ExitReason.Finished))
+                    {
+                        if (HungerGiven > 0)
+                        {
+                            if (cookingProcess.Recipe.Key == "Ambrosia" || Lazy.Count(chosenIngredients) == 0 && (isFlaming || cookingProcess.Recipe.Key != "BakedAngelFoodCake"))
+                            {
+                                Target.FinishedEatingCallback(Actor);
+                            }
+                            else
+                            {
+                                EventTracker.SendEvent(EventTypeId.kAteMeal, Actor, Target);
+                                ServingContainerSingle servingContainerSingle = Target as ServingContainerSingle;
+                                if (servingContainerSingle != null)
+                                {
+                                    if (cookingProcess.ObjectClickedOn is IFutureFoodSynthesizer)
+                                    {
+                                        Actor.BuffManager.AddElement(BuffNames.HungerResolved, Origin.FromFoodSynthesizer);
+                                        EventTracker.SendEvent(EventTypeId.kAteSynthMeal, Actor, Target);
+                                    }
+                                    if (!cookingProcess.IsSpoiled)
+                                    {
+                                        servingContainerSingle.AddEatingBuffs(Actor);
+                                    }
+                                    ((ServingContainer)servingContainerSingle).mDirtyAlarm = servingContainerSingle.AddAlarm(ServingContainerSingle.kMinutesUntilDirty, TimeUnit.Minutes, (AlarmTimerCallback)((ServingContainer)servingContainerSingle).AddDirtyCallback, "Serving Container: Make Dirty", AlarmType.DeleteOnReset);
+                                }
+                                if (!cookingProcess.Recipe.IsVegetarian)
+                                {
+                                    foreach (Sim sim in Actor.LotCurrent.GetSims())
+                                    {
+                                        if (sim.RoomId == Actor.RoomId && sim.TraitManager.HasElement(TraitNames.Vegetarian))
+                                        {
+                                            Sims3.Gameplay.Socializing.ActiveTopic.AddToSim(sim, "Disgusted By Meat");
+                                        }
+                                    }
+                                }
+                                if ((cookingProcess.IsSpoiled || cookingProcess.FoodState == FoodCookState.Burnt) && !isSloppy && !Actor.HasTrait(TraitNames.StinkySim))
+                                {
+                                    Actor.BuffManager.AddElement(BuffNames.Nauseous, Origin.FromDisgustingFood);
+                                }
+                            }
+                        }
+                        if (Autonomous && Actor.Posture.Container != null)
+                        {
+                            IEatingSurface eatingSurface = Actor.Posture.Container.Parent as IEatingSurface;
+                            if (eatingSurface != null && eatingSurface.AllowWaitForOthers && (eatingSurface.NumOtherSimsAtSurface(Actor) > 0 || ((GameObject)eatingSurface).ReferenceList.Count > 0))
+                            {
+                                Actor.LoopIdle();
+                                Actor.RegisterGroupTalk();
+                                mTimeWaitForOtherStarted = SimClock.CurrentTime();
+                                Actor.RemoveExitReason(ExitReason.Finished);
+                                Actor.TryGroupTalk();
+                                DoLoop(ExitReason.Default, (InsideLoopFunction)WaitForOthersLoopCallback, (StateMachineClient)null, 5);
+                                Actor.UnregisterGroupTalk();
+                            }
+                        }
+                        if (Target.CanBeCleanedUp && !ShouldDestroyContainer)
+                        {
+                            if (Actor.HasTrait(TraitNames.Neat) || !isSloppy && (!Actor.SimDescription.IsGhost || cookingProcess.Recipe.Key != "Ambrosia") && (!Actor.LotCurrent.IsCommunityLot || !(Target is IPaperContainer)) && RandomUtil.RandomChance(Food.CleanupChance))
+                            {
+                                TryPushCleanup();
+                            }
+                            else
+                            {
+                                pushAsContinuation = Target.Parent == Actor;
+                            }
+                        }
+                        if (preparedFood is ISingleServingContainer && ((ISingleServingContainer)preparedFood).FromResortBuffetTable && !Actor.BuffManager.HasElement(BuffNames.Stuffed) && Actor.Motives.GetMotiveValue((CommodityKind)commodityToChangeField.GetValue(this)) <= (float)ResortBuffetTable.kHungerToStopFeeding)
+                        {
+                            ResortBuffetTable.ConsumeMoreFood(Actor);
+                        }
+                    }
+                    else
+                    {
+                        pushAsContinuation = Target.Parent == Actor && !ShouldDestroyContainer;
+                    }
+                }
+                if (pushAsContinuation)
+                {
+                    Actor.InteractionQueue.PushAsContinuation(CarrySystem.PutDownHeldObject.Singleton, Target, false, new InteractionPriority(InteractionPriorityLevel.UserDirected), true);
+                }
+                if (HungerGiven > 0)
+                {
+                    if (!cookingProcess.IsSpoiled && cookingProcess.Recipe.Key == "Cake Slice")
+                    {
+                        Actor.BuffManager.AddElement(BuffNames.Meal, (int)((float)Sims3.Gameplay.Skills.Cooking.GoodMealBuffTuning.kBuffThreshold * HungerGiven / (float)hungerValueThresholdField.GetValue(this)), Sims3.Gameplay.Skills.Cooking.GoodMealBuffTuning.kBuffDuration * HungerGiven / (float)hungerValueThresholdField.GetValue(this), Origin.FromBirthdayCake);
+                    }
+                    if (isFlaming)
+                    {
+                        GetType().GetMethod("AddBuff").Invoke(this, new object[]
+                            {
+                                BuffNames.FlameOn,
+                                cookingProcess.Recipe.Key == "BakedAngelFoodCake" ? Origin.FromAngelFoodCake : Origin.None, Actor, HungerGiven / (float)hungerValueThresholdField.GetValue(this)
+                            });
+                    }
+                    TraitFunctions.VegetarianTraitEatingMeatCallback(Actor, cookingProcess.StartedByVegetarian, cookingProcess.Recipe);
+                    Food.PostEat(Actor, preparedFood, mIsSufficientlyFullForStuffed, true, mHasFatDelta);
+                    if (Target is Snack && cookingProcess.IsVampireFood && !Actor.SimDescription.IsVampire)
+                    {
+                        Actor.BuffManager.AddElement(BuffNames.Nauseous, Origin.None);
+                    }
+                    GetType().GetMethod("AddExtraBuffs").Invoke(this, new object[]
+                        {
+                            preparedFood,
+                            chosenIngredients
+                        });
+                    if (!cookingProcess.Recipe.IsSnack)
+                    {
+                        cookingProcess.Recipe.LearnFromEating(Actor);
+                    }
+                    Actor.BuffManager.RemoveElement(BuffNames.MintyBreath);
+                }
+                if (!Target.CanBeCleanedUp)
+                {
+                    CarrySystem.ExitCarry(Actor);
+                    addToUseList = false;
+                    DestroyObject(Target);
+                }
+                if (Actor.LotCurrent.IsCommunityLot && Target is IPaperContainer || ShouldDestroyContainer)
+                {
+                    Actor.InteractionQueue.PushAsContinuation(FinishEatingOutside.Singleton, Target, true);
+                }
                 StandardExit(addToUseList, addToUseList);
                 return succeeded;
             }
