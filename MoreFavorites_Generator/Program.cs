@@ -105,9 +105,9 @@ namespace Destrospean.MoreFavorites.Generator
 
             // Get the XML
             var xmlDocument = new XmlDocument();
-            var templateXMLPath = AppDomain.CurrentDomain.BaseDirectory + "Template.xml";
             if (args.Length == 0)
             {
+                var templateXMLPath = AppDomain.CurrentDomain.BaseDirectory + "Template.xml";
                 if (!File.Exists(templateXMLPath))
                 {
                     File.WriteAllText(templateXMLPath, new StreamReader(executable.GetManifestResourceStream("Template.xml")).ReadToEnd());
