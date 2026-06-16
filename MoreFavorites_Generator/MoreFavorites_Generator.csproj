@@ -169,6 +169,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="MoreFavorites.ico" />
+    <None Include="MoreFavorites.svg" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icons\cas_favorites_color_i_white_r2.png">
