@@ -8,6 +8,7 @@
     <RootNamespace>Destrospean.MoreFavorites.Generator</RootNamespace>
     <AssemblyName>MoreFavorites_Generator</AssemblyName>
     <UseMSBuildEngine>False</UseMSBuildEngine>
+    <ApplicationIcon>MoreFavorites.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -167,6 +168,7 @@
     <None Include="LICENSE.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="MoreFavorites.ico" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icons\cas_favorites_color_i_white_r2.png">
