@@ -8,7 +8,7 @@ using System.Xml;
 using Mono.Cecil;
 using s3pi.Interfaces;
 
-namespace Destrospean.MoreFavorites_Generator
+namespace Destrospean.MoreFavorites.Generator
 {
     class Program
     {
@@ -98,37 +98,43 @@ namespace Destrospean.MoreFavorites_Generator
 
         public static void Main(string[] args)
         {
+            var executable = System.Reflection.Assembly.GetExecutingAssembly();
+
+            // Create a new package to clone to
+            var newPackage = s3pi.Package.Package.NewPackage(0);
+
+            // Get the XML
+            var xmlDocument = new XmlDocument();
+            var templateXMLPath = AppDomain.CurrentDomain.BaseDirectory + "Template.xml";
+            if (args.Length == 0)
+            {
+                if (!File.Exists(templateXMLPath))
+                {
+                    File.WriteAllText(templateXMLPath, new StreamReader(executable.GetManifestResourceStream("Template.xml")).ReadToEnd());
+                    return;
+                }
+                xmlDocument.Load(templateXMLPath);
+            }
+            else
+            {
+                xmlDocument.Load(args[0]);
+            }
+
             Console.Write("Specify a unique suffix for the batch of favorites entries (leave blank for a random number suffix): ");
 
             // Get a unique name for the assembly and _XML resource
             string identifier = Console.ReadLine(),
             assemblyName = "MoreFavorites_" + (string.IsNullOrEmpty(identifier) ? FNV32.GetHash(Guid.NewGuid().ToString()).ToString() : identifier);
 
-            // Load the base package and create a new package to clone to
-            IPackage basePackage = s3pi.Package.Package.OpenPackage(0, AppDomain.CurrentDomain.BaseDirectory + "_MoreFavorites_Base.package"),
-            newPackage = s3pi.Package.Package.NewPackage(0);
-
-            // Get the assembly and XML
-            AssemblyDefinition assembly = null;
-            var xmlDocument = new XmlDocument();
-            xmlDocument.Load(args.Length == 0 ? "_MoreFavorites_Base.xml" : args[0]);
-            foreach (var resourceIndexEntry in basePackage.FindAll(x => x.Instance == FNV64.GetHash("MoreFavorites_Base")))
-            {
-                switch (resourceIndexEntry.ResourceType)
-                {
-                    case 0x73FAA07:
-                        assembly = AssemblyDefinition.ReadAssembly(((ScriptResource.ScriptResource)s3pi.WrapperDealer.WrapperDealer.GetResource(0, basePackage, resourceIndexEntry)).Assembly.BaseStream);
-                        break;
-                }
-            }
+            var assembly = AssemblyDefinition.ReadAssembly(executable.GetManifestResourceStream("MoreFavorites_Base.dll"));
 
             // Get the icons for the white color
-            Bitmap largeColorIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x8613BD10D6A2A88F))),
-            largeFoodIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x06C597356E005A84))),
-            largeMusicIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0xD855091FEF17D3F7))),
-            smallColorIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x35B84649E916A075))),
-            smallFoodIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0xB5670F19A83E8822))),
-            smallMusicIMAG = new Bitmap(((APackage)basePackage).GetResource(basePackage.Find(x => x.Instance == 0x10C3F84F0EE4A06D)));
+            Bitmap largeColorIMAG = new Bitmap(executable.GetManifestResourceStream("cas_favorites_color_i_white_r2.png")),
+            largeFoodIMAG = new Bitmap(executable.GetManifestResourceStream("cas_favorites_food_i_hamburger_r2.png")),
+            largeMusicIMAG = new Bitmap(executable.GetManifestResourceStream("cas_favorites_music_i_electronica_r2.png")),
+            smallColorIMAG = new Bitmap(executable.GetManifestResourceStream("cas_favorites_color_i_white_s_r2.png")),
+            smallFoodIMAG = new Bitmap(executable.GetManifestResourceStream("cas_favorites_food_i_hamburger_s_r2.png")),
+            smallMusicIMAG = new Bitmap(executable.GetManifestResourceStream("cas_favorites_music_i_electronica_s_r2.png"));
 
             // Copy the elements from the XML to put into the new package
             XmlNode rootNode = xmlDocument.SelectSingleNode("Favorites") ?? xmlDocument.SelectSingleNode("Favourites");
@@ -270,7 +276,7 @@ namespace Destrospean.MoreFavorites_Generator
                 }.Stream, true);
 
             // Save the new package with the new name
-            newPackage.SaveAs(assemblyName + ".package");
+            newPackage.SaveAs(AppDomain.CurrentDomain.BaseDirectory + assemblyName + ".package");
         }
     }
 }

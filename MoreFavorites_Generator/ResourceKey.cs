@@ -1,6 +1,6 @@
 ﻿using s3pi.Interfaces;
 
-namespace Destrospean.MoreFavorites_Generator
+namespace Destrospean.MoreFavorites.Generator
 {
     public class ResourceKey : IResourceKey
     {

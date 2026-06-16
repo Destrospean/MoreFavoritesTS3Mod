@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{95B27166-5E72-4116-9E53-3AC352B8BC47}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Destrospean.MoreFavorites_Generator</RootNamespace>
+    <RootNamespace>Destrospean.MoreFavorites.Generator</RootNamespace>
     <AssemblyName>MoreFavorites_Generator</AssemblyName>
     <UseMSBuildEngine>False</UseMSBuildEngine>
   </PropertyGroup>
@@ -154,13 +154,6 @@
     </Reference>
     <Reference Include="s3pi.WrapperDealer">
       <HintPath>libs\s3pi.WrapperDealer.dll</HintPath>
-    </Reference>
-    <Reference Include="s3piwrappers.AudioResources">
-      <HintPath>libs\s3piwrappers.AudioResources.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3piwrappers.Helpers">
-      <HintPath>libs\s3piwrappers.Helpers.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Custom">
@@ -174,11 +167,42 @@
     <None Include="LICENSE.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="_MoreFavorites_Base.package">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="_MoreFavorites_Base.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\cas_favorites_color_i_white_r2.png">
+      <LogicalName>cas_favorites_color_i_white_r2.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\cas_favorites_color_i_white_s_r2.png">
+      <LogicalName>cas_favorites_color_i_white_s_r2.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\cas_favorites_food_i_hamburger_r2.png">
+      <LogicalName>cas_favorites_food_i_hamburger_r2.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\cas_favorites_food_i_hamburger_s_r2.png">
+      <LogicalName>cas_favorites_food_i_hamburger_s_r2.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\cas_favorites_music_i_electronica_r2.png">
+      <LogicalName>cas_favorites_music_i_electronica_r2.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Icons\cas_favorites_music_i_electronica_s_r2.png">
+      <LogicalName>cas_favorites_music_i_electronica_s_r2.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Template.xml">
+      <LogicalName>Template.xml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\MoreFavorites_Base\bin\Release\MoreFavorites_Base.dll">
+      <Link>MoreFavorites_Base.dll</Link>
+      <LogicalName>MoreFavorites_Base.dll</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Icons\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MoreFavorites_Base\MoreFavorites_Base.csproj">
+      <Project>{E6A29044-2388-4687-B3BA-06AD5C4DE6A3}</Project>
+      <Name>MoreFavorites_Base</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
 </Project>
