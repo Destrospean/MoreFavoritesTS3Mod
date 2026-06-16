@@ -126,6 +126,7 @@ namespace Destrospean.MoreFavorites.Generator
             string identifier = Console.ReadLine(),
             assemblyName = "MoreFavorites_" + (string.IsNullOrEmpty(identifier) ? FNV32.GetHash(Guid.NewGuid().ToString()).ToString() : identifier);
 
+            // Get the assembly
             var assembly = AssemblyDefinition.ReadAssembly(executable.GetManifestResourceStream("MoreFavorites_Base.dll"));
 
             // Get the icons for the white color
@@ -137,7 +138,7 @@ namespace Destrospean.MoreFavorites.Generator
             smallMusicIMAG = new Bitmap(executable.GetManifestResourceStream("cas_favorites_music_i_electronica_s_r2.png"));
 
             // Copy the elements from the XML to put into the new package
-            XmlNode rootNode = xmlDocument.SelectSingleNode("Favorites") ?? xmlDocument.SelectSingleNode("Favourites");
+            var rootNode = xmlDocument.SelectSingleNode("Favorites") ?? xmlDocument.SelectSingleNode("Favourites");
             List<XmlElement> favoriteColorElements = new List<XmlElement>(),
             favoriteFoodElements = new List<XmlElement>(),
             favoriteMusicElements = new List<XmlElement>(),
