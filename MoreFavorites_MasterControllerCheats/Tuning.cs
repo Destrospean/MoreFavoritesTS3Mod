@@ -3,9 +3,6 @@
     public static class MasterControllerCheats
     {
         [Sims3.SimIFace.Tunable]
-        public static bool kAllowBlacklistedFavoritesInMasterControllerDialogs;
-
-        [Sims3.SimIFace.Tunable]
-        public static bool kAllowHiddenFavoritesInMasterControllerDialogs;
+        public static bool kAllowBlacklistedFavoritesInMasterControllerDialogs, kAllowHiddenFavoritesInMasterControllerDialogs;
     }
 }
