@@ -519,9 +519,9 @@ namespace Destrospean.MoreFavorites
                     }
                 }
                 mCurrentStateMachine.AddOneShotScriptEventHandler(101, new ObjectHideHelper(Target).Callback);
-                mCurrentStateMachine.AddOneShotScriptEventHandler(105, (SacsEventHandler)ParentFoodToContainer);
-                mCurrentStateMachine.AddPersistentScriptEventHandler(501, (SacsEventHandler)StartSloppyVFX);
-                mCurrentStateMachine.AddPersistentScriptEventHandler(502, (SacsEventHandler)StopSloppyVFX);
+                mCurrentStateMachine.AddOneShotScriptEventHandler(105, ParentFoodToContainer);
+                mCurrentStateMachine.AddPersistentScriptEventHandler(501, StartSloppyVFX);
+                mCurrentStateMachine.AddPersistentScriptEventHandler(502, StopSloppyVFX);
                 if (eatingPosture == EatingPosture.living)
                 {
                     Seat.EnsureLivingChairPosture(Actor);
@@ -541,7 +541,7 @@ namespace Destrospean.MoreFavorites
                 if (cookingProcess.Recipe.Key == "BrainFreeze")
                 {
                     AddMotiveDelta(CommodityKind.BeAZombie, BuffZombieFreeze.kZombieCommodityChangeRate);
-                    reactionBroadcaster = new ReactionBroadcaster((IGameObject)Actor, BuffZombieFreeze.kBrainFreezeCreepedOutBroadcasterParams, (ReactionBroadcaster.BroadcastCallback)OnEnterCreepedOut);
+                    reactionBroadcaster = new ReactionBroadcaster(Actor, BuffZombieFreeze.kBrainFreezeCreepedOutBroadcasterParams, OnEnterCreepedOut);
                 }
                 Actor.RegisterGroupTalk();
                 OccultImaginaryFriend.GrantMilestoneBuff(Actor, BuffNames.ImaginaryFriendAteFood, Origin.FromImaginaryFriendFirstTime, false, true, false);
@@ -563,11 +563,11 @@ namespace Destrospean.MoreFavorites
                 float hungerMultiplier = 1;
                 if (Actor.SimDescription.IsMermaid && !cookingProcess.IsMermaidFood)
                 {
-                    hungerMultiplier = MathUtils.Clamp((float)GetType().GetMethod("CountFishInFood").Invoke(this, new object[]
+                    hungerMultiplier = MathUtils.Clamp((float)(int)GetType().GetMethod("CountFishInFood").Invoke(this, new object[]
                         {
                             chosenIngredients,
                             cookingProcess.Recipe
-                        }) * ((bool)GetType().GetField("kHungerGivenIsPerFish", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) ? ((float)GetType().GetField("kHungerPerFish", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) / MathUtils.Clamp((float)Food.FoodUnitsFullServing * kHungerValuePerBiteForMeal, 1, kHungerValueForMeal)) : 1), OccultMermaid.kHungerValueMultiplier, 1);
+                        }) * ((bool)GetType().GetField("kHungerGivenIsPerFish", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) ? ((float)GetType().GetField("kHungerPerFish", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) / MathUtils.Clamp(Food.FoodUnitsFullServing * kHungerValuePerBiteForMeal, 1, kHungerValueForMeal)) : 1), OccultMermaid.kHungerValueMultiplier, 1);
                 }
                 if (Actor.SimDescription.IsFrankenstein)
                 {
@@ -591,8 +591,8 @@ namespace Destrospean.MoreFavorites
                     reactionBroadcaster.Dispose();
                 }
                 SetParameter("wasInterrupted", !Actor.HasExitReason(ExitReason.Finished));
-                mCurrentStateMachine.RemoveEventHandler((SacsEventHandler)StartSloppyVFX);
-                mCurrentStateMachine.RemoveEventHandler((SacsEventHandler)StopSloppyVFX);
+                mCurrentStateMachine.RemoveEventHandler(StartSloppyVFX);
+                mCurrentStateMachine.RemoveEventHandler(StopSloppyVFX);
                 AnimateSim("Exit");
                 mPetWatchSimEatingHelper.Watchable = false;
                 if (mPropHandle != ObjectGuid.InvalidObjectGuid)
@@ -626,7 +626,7 @@ namespace Destrospean.MoreFavorites
                                     {
                                         servingContainerSingle.AddEatingBuffs(Actor);
                                     }
-                                    ((ServingContainer)servingContainerSingle).mDirtyAlarm = servingContainerSingle.AddAlarm(ServingContainerSingle.kMinutesUntilDirty, TimeUnit.Minutes, (AlarmTimerCallback)((ServingContainer)servingContainerSingle).AddDirtyCallback, "Serving Container: Make Dirty", AlarmType.DeleteOnReset);
+                                    servingContainerSingle.mDirtyAlarm = servingContainerSingle.AddAlarm(ServingContainerSingle.kMinutesUntilDirty, TimeUnit.Minutes, servingContainerSingle.AddDirtyCallback, "Serving Container: Make Dirty", AlarmType.DeleteOnReset);
                                 }
                                 if (!cookingProcess.Recipe.IsVegetarian)
                                 {
@@ -654,7 +654,7 @@ namespace Destrospean.MoreFavorites
                                 mTimeWaitForOtherStarted = SimClock.CurrentTime();
                                 Actor.RemoveExitReason(ExitReason.Finished);
                                 Actor.TryGroupTalk();
-                                DoLoop(ExitReason.Default, (InsideLoopFunction)WaitForOthersLoopCallback, (StateMachineClient)null, 5);
+                                DoLoop(ExitReason.Default, WaitForOthersLoopCallback, null, 5);
                                 Actor.UnregisterGroupTalk();
                             }
                         }
@@ -694,7 +694,9 @@ namespace Destrospean.MoreFavorites
                         GetType().GetMethod("AddBuff").Invoke(this, new object[]
                             {
                                 BuffNames.FlameOn,
-                                cookingProcess.Recipe.Key == "BakedAngelFoodCake" ? Origin.FromAngelFoodCake : Origin.None, Actor, HungerGiven / (float)hungerValueThresholdField.GetValue(this)
+                                cookingProcess.Recipe.Key == "BakedAngelFoodCake" ? Origin.FromAngelFoodCake : Origin.None,
+                                Actor,
+                                HungerGiven / (float)hungerValueThresholdField.GetValue(this)
                             });
                     }
                     TraitFunctions.VegetarianTraitEatingMeatCallback(Actor, cookingProcess.StartedByVegetarian, cookingProcess.Recipe);
