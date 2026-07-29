@@ -563,7 +563,7 @@ namespace Destrospean.MoreFavorites
                 float hungerMultiplier = 1;
                 if (Actor.SimDescription.IsMermaid && !cookingProcess.IsMermaidFood)
                 {
-                    hungerMultiplier = MathUtils.Clamp((float)(int)GetType().GetMethod("CountFishInFood").Invoke(this, new object[]
+                    hungerMultiplier = MathUtils.Clamp((int)GetType().GetMethod("CountFishInFood").Invoke(this, new object[]
                         {
                             chosenIngredients,
                             cookingProcess.Recipe
@@ -687,7 +687,7 @@ namespace Destrospean.MoreFavorites
                 {
                     if (!cookingProcess.IsSpoiled && cookingProcess.Recipe.Key == "Cake Slice")
                     {
-                        Actor.BuffManager.AddElement(BuffNames.Meal, (int)((float)Sims3.Gameplay.Skills.Cooking.GoodMealBuffTuning.kBuffThreshold * HungerGiven / (float)hungerValueThresholdField.GetValue(this)), Sims3.Gameplay.Skills.Cooking.GoodMealBuffTuning.kBuffDuration * HungerGiven / (float)hungerValueThresholdField.GetValue(this), Origin.FromBirthdayCake);
+                        Actor.BuffManager.AddElement(BuffNames.Meal, (int)(Sims3.Gameplay.Skills.Cooking.GoodMealBuffTuning.kBuffThreshold * HungerGiven / (float)hungerValueThresholdField.GetValue(this)), Sims3.Gameplay.Skills.Cooking.GoodMealBuffTuning.kBuffDuration * HungerGiven / (float)hungerValueThresholdField.GetValue(this), Origin.FromBirthdayCake);
                     }
                     if (isFlaming)
                     {

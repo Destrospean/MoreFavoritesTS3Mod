@@ -502,58 +502,45 @@ namespace Destrospean.MoreFavorites
 
         public static bool IsMusicTypeInstalled(FavoriteMusicType music)
         {
-            bool result = true;
             switch (music)
             {
                 case FavoriteMusicType.None:
                 case FavoriteMusicType.Count:
-                    result = false;
-                    break;
+                    return false;
                 case FavoriteMusicType.France:
                 case FavoriteMusicType.China:
                 case FavoriteMusicType.Egypt:
-                    result = GameUtils.IsInstalled(ProductVersion.EP1);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.EP1);
                 case FavoriteMusicType.Roots:
                 case FavoriteMusicType.Soul:
-                    result = GameUtils.IsInstalled(ProductVersion.EP2);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.EP2);
                 case FavoriteMusicType.Rockabilly:
-                    result = GameUtils.IsInstalled(ProductVersion.SP2);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.SP2);
                 case FavoriteMusicType.HipHop:
-                    result = GameUtils.IsInstalled(ProductVersion.EP3);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.EP3);
                 case FavoriteMusicType.Country:
                 case FavoriteMusicType.RnB:
                 case FavoriteMusicType.Songwriter:
-                    result = GameUtils.IsInstalled(ProductVersion.EP5);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.EP5);
                 case FavoriteMusicType.DarkWave:
-                    result = GameUtils.IsInstalled(ProductVersion.EP7);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.EP7);
                 case FavoriteMusicType.Disco:
                 case FavoriteMusicType.Rap:
                 case FavoriteMusicType.Rock:
-                    result = GameUtils.IsInstalled(ProductVersion.SP8);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.SP8);
                 case FavoriteMusicType.GeekRock:
-                    result = GameUtils.IsInstalled(ProductVersion.EP9);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.EP9);
                 case FavoriteMusicType.BeachParty:
                 case FavoriteMusicType.IslandLife:
-                    result = GameUtils.IsInstalled(ProductVersion.EP10);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.EP10);
                 case FavoriteMusicType.Horror:
                 case FavoriteMusicType.Epic:
                 case FavoriteMusicType.Spaghetti_Western:
-                    result = GameUtils.IsInstalled(ProductVersion.SP9);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.SP9);
                 case FavoriteMusicType.FutureWorld:
-                    result = GameUtils.IsInstalled(ProductVersion.EP11);
-                    break;
+                    return GameUtils.IsInstalled(ProductVersion.EP11);
             }
-            return result;
+            return true;
         }
     }
 }
