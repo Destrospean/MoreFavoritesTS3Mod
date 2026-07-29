@@ -218,8 +218,7 @@ namespace Destrospean.MoreFavorites
                 }
                 EatingPosture eatingPosture = GetPostureParam();
                 SetParameter("eatPosture", eatingPosture);
-                FavoritesUtils.FavoriteFood favoriteFood;
-                SetParameter("isFavorite", Actor.SimDescription.FavoriteFood != 0 && Target.Recipe != null && (Target.Recipe.Favorite == Actor.SimDescription.FavoriteFood || FavoritesUtils.FavoriteFoodDictionary.TryGetValue(Actor.SimDescription.FavoriteFood, out favoriteFood) && (favoriteFood.Name == Target.Recipe.Key || new List<FavoriteFoodType>(FavoritesUtils.FavoriteFoodDictionary.Keys).Exists(x => !x.IsBlacklisted() && FavoritesUtils.FavoriteFoodDictionary[x].Parent == favoriteFood.Name && FavoritesUtils.FavoriteFoodDictionary[x].Name == Target.Recipe.Key))));
+                SetParameter("isFavorite", Target.Recipe.IsFavoriteOfSim(Actor.SimDescription));
                 SetParameter("isSloppy", Actor.HasTrait(TraitNames.Slob));
                 SetParameter("isSpoiled", Target.Spoiled);
                 SetParameter("isIceCream", Target is SnackIceCream);
@@ -482,8 +481,7 @@ namespace Destrospean.MoreFavorites
                 bool isSloppy = Actor.HasTrait(TraitNames.Slob);
                 EatingPosture eatingPosture = GetPostureParam();
                 SetParameter("eatPosture", eatingPosture);
-                FavoritesUtils.FavoriteFood favoriteFood;
-                SetParameter("isFavorite", Actor.SimDescription.FavoriteFood != 0 && cookingProcess.Recipe != null && (cookingProcess.Recipe.Favorite == Actor.SimDescription.FavoriteFood || FavoritesUtils.FavoriteFoodDictionary.TryGetValue(Actor.SimDescription.FavoriteFood, out favoriteFood) && (favoriteFood.Name == cookingProcess.Recipe.Key || new List<FavoriteFoodType>(FavoritesUtils.FavoriteFoodDictionary.Keys).Exists(x => !x.IsBlacklisted() && FavoritesUtils.FavoriteFoodDictionary[x].Parent == favoriteFood.Name && FavoritesUtils.FavoriteFoodDictionary[x].Name == cookingProcess.Recipe.Key))));
+                SetParameter("isFavorite", cookingProcess.Recipe.IsFavoriteOfSim(Actor.SimDescription));
                 SetParameter("isSloppy", isSloppy);
                 SetParameter("isSpoiled", cookingProcess.IsSpoiled);
                 SetParameter("isIceCream", Target is SnackIceCream);
@@ -763,11 +761,7 @@ namespace Destrospean.MoreFavorites
                     gameObject.FadeOut();
                     gameObject.Destroy();
                 }
-                string materialStateName = "drink" + definition.DrinkName;
-                if (!FavoritesUtils.OriginalFavoriteColors.Contains(definition.DrinkName))
-                {
-                    materialStateName = "MoreFavs_" + FavoritesUtils.FindClosestColor(Array.ConvertAll(FavoritesUtils.FutureBarGlassRGBValues, x => new Color(x | 0xFF000000)), definition.DrinkColor).ARGB.ToString("X8").Substring(2);
-                }
+                string materialStateName = definition.GetMaterialStateName();
                 FutureBar.FutureBarGlass futureBarGlass = (FutureBar.FutureBarGlass)GlobalFunctions.CreateObjectOutOfWorld("accessoryGlassEP11", ProductVersion.EP11);
                 futureBarGlass.SetOpacity(0, 0);
                 if (definition.DrinkName == "ServoJuice")
@@ -903,8 +897,7 @@ namespace Destrospean.MoreFavorites
                         {
                             moodScore += peripheralStereoSpeaker.StandaloneMoodScore;
                         }
-                        FavoritesUtils.FavoriteMusic favoriteMusic;
-                        if (mPlayingStationsData != null && (mPlayingStationsData.MusicType == sim.SimDescription.FavoriteMusic || FavoritesUtils.FavoriteMusicDictionary.TryGetValue(sim.SimDescription.FavoriteMusic, out favoriteMusic) && (favoriteMusic.Name == mPlayingStationsData.mStationName.Split(':')[1] || new List<FavoriteMusicType>(FavoritesUtils.FavoriteMusicDictionary.Keys).Exists(x => !x.IsBlacklisted() && FavoritesUtils.FavoriteMusicDictionary[x].Parent == favoriteMusic.Name && FavoritesUtils.FavoriteMusicDictionary[x].Name == mPlayingStationsData.mStationName.Split(':')[1]))))
+                        if (mPlayingStationsData.IsFavoriteOfSim(sim.SimDescription))
                         {
                             moodScore += BuffEnjoyingMusic.FavoriteMusicMoodScore;
                         }

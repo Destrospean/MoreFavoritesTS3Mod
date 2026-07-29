@@ -348,6 +348,11 @@ namespace Destrospean.MoreFavorites
             return Math.Sqrt(Math.Pow(a.Red - b.Red, 2) + Math.Pow(a.Green - b.Green, 2) + Math.Pow(a.Blue - b.Blue, 2));
         }
 
+        public static string GetMaterialStateName(this FutureBar.OrderDrinks.Definition definition)
+        {
+            return OriginalFavoriteColors.Contains(definition.DrinkName) ? "drink" + definition.DrinkName : "MoreFavs_" + FindClosestColor(Array.ConvertAll(FutureBarGlassRGBValues, x => new Color(x | 0xFF000000)), definition.DrinkColor).ARGB.ToString("X8").Substring(2);
+        }
+
         public static void InitFavorites()
         {
             List<CASCharacter.NameColorPair> favoriteColorList = new List<CASCharacter.NameColorPair>(CASCharacter.kColors);
@@ -483,6 +488,18 @@ namespace Destrospean.MoreFavorites
         public static bool IsBlacklisted(this CASCharacter.NameColorPair nameColorPair)
         {
             return FavoriteColorBlacklist.Contains(nameColorPair.mName);
+        }
+
+        public static bool IsFavoriteOfSim(this Recipe recipe, ISimDescription simDescription)
+        {
+            FavoriteFood favoriteFood;
+            return simDescription.FavoriteFood != 0 && recipe != null && (recipe.Favorite == simDescription.FavoriteFood || FavoriteFoodDictionary.TryGetValue(simDescription.FavoriteFood, out favoriteFood) && (favoriteFood.Name == recipe.Key || new List<FavoriteFoodType>(FavoriteFoodDictionary.Keys).Exists(x => !x.IsBlacklisted() && FavoriteFoodDictionary[x].Parent == favoriteFood.Name && FavoriteFoodDictionary[x].Name == recipe.Key)));
+        }
+
+        public static bool IsFavoriteOfSim(this StereoStationData stereoStationData, ISimDescription simDescription)
+        {
+            FavoriteMusic favoriteMusic;
+            return stereoStationData != null && (stereoStationData.MusicType == simDescription.FavoriteMusic || FavoriteMusicDictionary.TryGetValue(simDescription.FavoriteMusic, out favoriteMusic) && (favoriteMusic.Name == stereoStationData.mStationName.Split(':')[1] || new List<FavoriteMusicType>(FavoriteMusicDictionary.Keys).Exists(x => !x.IsBlacklisted() && FavoriteMusicDictionary[x].Parent == favoriteMusic.Name && FavoriteMusicDictionary[x].Name == stereoStationData.mStationName.Split(':')[1])));
         }
 
         public static bool IsHidden(this FavoriteFoodType foodType)
