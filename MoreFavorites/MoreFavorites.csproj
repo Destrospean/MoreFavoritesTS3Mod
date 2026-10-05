@@ -53,6 +53,8 @@
     <Compile Include="FavoritesUtils.cs" />
     <Compile Include="Replacements.cs" />
     <Compile Include="ExtensionAttribute.cs" />
+    <Compile Include="NRaasMasterControllerIntegration.cs" />
+    <Compile Include="Tuning.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
@@ -93,6 +95,14 @@
     </Reference>
     <Reference Include="Sims3Metadata">
       <HintPath>..\libs\Sims3MetaData.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="NRaasMasterController">
+      <HintPath>..\libs\NRaasMasterController.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="NRaasMasterControllerCheats">
+      <HintPath>..\libs\NRaasMasterControllerCheats.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

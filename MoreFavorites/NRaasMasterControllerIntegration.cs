@@ -8,15 +8,12 @@ using Sims3.Gameplay.UI;
 using Sims3.SimIFace;
 using Sims3.SimIFace.CAS;
 using Sims3.UI.CAS;
-using Tuning = Sims3.Gameplay.Destrospean.MoreFavorites.MasterControllerCheats;
+using Tuning = Sims3.Gameplay.Destrospean.MoreFavorites;
 
-namespace Destrospean.MoreFavorites.MasterControllerCheats
+namespace Destrospean.MoreFavorites
 {
-    public class Main
+    public class NRaasMasterControllerIntegration
     {
-        [Tunable]
-        protected static bool kInstantiator;
-
         public class ChangeFavoriteColorPatch : ChangeFavoriteColor
         {
             protected override bool Run(SimDescription me, bool singleSelection)
@@ -145,7 +142,7 @@ namespace Destrospean.MoreFavorites.MasterControllerCheats
             }
         }
 
-        static Main()
+        public static void Init()
         {
             BindingFlags nonPublicInstance = BindingFlags.NonPublic | BindingFlags.Instance;
             MoreFavorites.Main.ReplaceMethod(typeof(ChangeFavoriteColor).GetMethod("Run", nonPublicInstance), typeof(ChangeFavoriteColorPatch).GetMethod("Run", nonPublicInstance));

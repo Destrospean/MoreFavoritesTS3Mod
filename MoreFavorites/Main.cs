@@ -39,10 +39,15 @@ namespace Destrospean.MoreFavorites
             ReplaceMethod(typeof(Sims3.Gameplay.CAS.SimDescription).GetMethod("RandomizePreferences"), typeof(Replacements).GetMethod("RandomizePreferences"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.Electronics.Stereo).GetMethod("AddEnjoyingMusicCallback", nonPublicInstance), typeof(Replacements.StereoPatch).GetMethod("AddEnjoyingMusicCallback"));
             ReplaceMethod(typeof(Sims3.Gameplay.Objects.Electronics.StereoStationData).GetMethod("GetStationName"), typeof(Replacements).GetMethod("GetStationName"));
-            Type icarusAllSortsEatHeldFoodOverrideType = Type.GetType("Sims3.Gameplay.Objects.CookingObjects.icarusallsorts.EatHeldFoodOverride, icarusallsorts.EatHeldFoodOverride");
+            Type icarusAllSortsEatHeldFoodOverrideType = Type.GetType("Sims3.Gameplay.Objects.CookingObjects.icarusallsorts.EatHeldFoodOverride, icarusallsorts.EatHeldFoodOverride"),
+            nraasMasterControllerCheatsChangeFavoriteColorType = Type.GetType("NRaas.MasterControllerSpace.Sims.Intermediate.Favorites.ChangeFavoriteColor, NRaasMasterControllerCheats");
             if (icarusAllSortsEatHeldFoodOverrideType != null)
             {
                 ReplaceMethod(icarusAllSortsEatHeldFoodOverrideType.GetMethod("Run"), typeof(Replacements.EatHeldFoodPatch).GetMethod("RunIcarusAllSortsOverride"));
+            }
+            if (nraasMasterControllerCheatsChangeFavoriteColorType != null)
+            {
+                NRaasMasterControllerIntegration.Init();
             }
             Sims3.SimIFace.LoadSaveManager.ObjectGroupsPreLoad += FavoritesUtils.InitFavorites;
         }
